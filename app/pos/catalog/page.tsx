@@ -266,11 +266,13 @@ export default function CatalogPage() {
           )}
         </div>
 
-        <div className="w-96 flex flex-col gap-4">
-          <Cart products={products} />
+        <div className="w-96 flex flex-col gap-4 overflow-hidden">
+          <div className="flex-1 min-h-0">
+            <Cart products={products} />
+          </div>
           <button
             onClick={handleCheckout}
-            className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition shadow-md"
+            className="flex-shrink-0 w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition shadow-md"
           >
             ✓ Finalizar venta
           </button>
