@@ -104,28 +104,17 @@ export function Cart({ products }: { products: Product[] }) {
 
       {/* Footer fijo con total y botones */}
       <div className="flex-shrink-0 border-t border-gray-200 p-6 bg-gradient-to-r from-orange-50 to-slate-50">
-        <div className="space-y-3 mb-4">
-          <div className="flex justify-between text-lg">
-            <span className="text-gray-600">Subtotal:</span>
-            <span className="font-semibold">${total.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-lg font-bold">
-            <span>Total:</span>
-            <span className="text-orange-600">${total.toFixed(2)}</span>
-          </div>
+        <div className="flex justify-between text-lg font-bold mb-4">
+          <span>Total:</span>
+          <span className="text-orange-600">${total.toFixed(2)}</span>
         </div>
 
-        <div className="space-y-2">
-          <button className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition-colors duration-200 text-sm font-semibold shadow-sm">
-            Proceder al pago
-          </button>
-          <button
-            onClick={clearCart}
-            className="w-full bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors duration-200 text-sm font-medium"
-          >
-            Limpiar carrito
-          </button>
-        </div>
+        <button
+          onClick={clearCart}
+          className="w-full bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors duration-200 text-sm font-medium"
+        >
+          Limpiar carrito
+        </button>
       </div>
     </div>
   );
