@@ -17,6 +17,12 @@ export default function POSDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const posNumber = parseInt(params.posNumber as string);
+  
+  const POS_NAMES: Record<number, string> = {
+    1: 'Costa del Este',
+    2: 'Mar de las Pampas',
+    3: 'Costa Esmeralda',
+  };
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -46,7 +52,7 @@ export default function POSDetailPage() {
             ← Volver
           </Link>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">{stats?.pos_name || `Punto de Venta ${posNumber}`}</h1>
+            <h1 className="text-4xl font-bold text-gray-900">{POS_NAMES[posNumber] || `Punto de Venta ${posNumber}`}</h1>
             <p className="text-gray-600 mt-2">Detalles y estadísticas</p>
           </div>
         </div>
@@ -88,7 +94,7 @@ export default function POSDetailPage() {
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-6 lg:p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Productos más vendidos - {stats.pos_name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Productos más vendidos - {POS_NAMES[posNumber]}</h2>
               {stats.top_products.length === 0 ? (
                 <p className="text-gray-600 text-center py-8">No hay datos disponibles</p>
               ) : (

@@ -1,6 +1,12 @@
 import { supabase } from '@/lib/supabase';
 import { Sale, SaleItem, DashboardStats, POSDashboardStats } from '@/lib/types';
 
+const POS_NAMES: Record<number, string> = {
+  1: 'Costa del Este',
+  2: 'Mar de las Pampas',
+  3: 'Costa Esmeralda',
+};
+
 export const salesService = {
   async createSale(posId: string, posNumber: number, items: SaleItem[], total: number): Promise<Sale | null> {
     try {
@@ -66,12 +72,6 @@ export const salesService = {
 
   async getPosDashboard(posId: string, posNumber: number): Promise<POSDashboardStats | null> {
     try {
-      const { data: user } = await supabase
-        .from('users')
-        .select('name')
-        .eq('pos_number', posNumber)
-        .single();
-
       const { data: sales, error } = await supabase
         .from('sales')
         .select('*')
@@ -113,7 +113,7 @@ export const salesService = {
 
       return {
         pos_number: posNumber,
-        pos_name: user?.name || `POS ${posNumber}`,
+        pos_name: POS_NAMES[posNumber] || `POS ${posNumber}`,
         total_sales,
         total_revenue,
         total_items_sold,
