@@ -37,7 +37,7 @@ export default function StatsPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-6xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Estadísticas - POS {user.pos_number}</h1>
+        <h1 className="text-3xl font-bold mb-6">Estadísticas - {user.name || `POS ${user.pos_number}`}</h1>
 
         {loading ? (
           <div className="text-center py-12">Cargando estadísticas...</div>

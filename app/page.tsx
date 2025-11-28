@@ -92,22 +92,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-orange-50 rounded-lg">
-          <p className="text-sm text-gray-600 mb-2 font-semibold">Datos de prueba:</p>
-          <p className="text-xs text-gray-600">
-            <strong>Admin:</strong> admin@test.com / admin123
-          </p>
-          <p className="text-xs text-gray-600">
-            <strong>Costa del Este (Anabel):</strong> anabel@test.com / pocopan1711
-          </p>
-          <p className="text-xs text-gray-600">
-            <strong>Mar de las Pampas (Sofía):</strong> sofia@test.com / pocopan2722
-          </p>
-          <p className="text-xs text-gray-600">
-            <strong>Costa Esmeralda (Jano):</strong> jano@test.com / pocopan3733
-          </p>
-        </div>
-
         <p className="text-center text-sm text-gray-600 mt-6">
           ¿No tienes cuenta?{' '}
           <Link href="/register" className="text-orange-600 hover:underline font-semibold">

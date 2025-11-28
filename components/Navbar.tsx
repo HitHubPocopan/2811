@@ -54,7 +54,7 @@ export function Navbar() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm">
-            {user.role === 'admin' ? 'Admin' : `POS ${user.pos_number}`}
+            {user.role === 'admin' ? 'Admin' : user.name || `POS ${user.pos_number}`}
           </span>
           <button
             onClick={handleLogout}
