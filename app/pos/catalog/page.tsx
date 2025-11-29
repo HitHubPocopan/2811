@@ -8,7 +8,7 @@ import { useAuthStore, useCartStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
 import { Product } from '@/lib/types';
 
-const PRODUCTS_PER_PAGE = 12;
+
 
 export default function CatalogPage() {
   const router = useRouter();
@@ -21,7 +21,6 @@ export default function CatalogPage() {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
   const [subcategories, setSubcategories] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -51,7 +50,6 @@ export default function CatalogPage() {
       } else {
         setSubcategories([]);
       }
-      setCurrentPage(1);
     };
 
     fetchSubcategories();
@@ -80,9 +78,7 @@ export default function CatalogPage() {
     return matchesSearch && matchesCategory && matchesSubcategory;
   });
 
-  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
-  const startIdx = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const paginatedProducts = filteredProducts.slice(startIdx, startIdx + PRODUCTS_PER_PAGE);
+
 
   if (!user) {
     return null;
@@ -103,10 +99,7 @@ export default function CatalogPage() {
               type="text"
               placeholder="🔍 Buscar productos..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm mb-4"
             />
 
@@ -118,7 +111,6 @@ export default function CatalogPage() {
                   onChange={(e) => {
                     setSelectedCategory(e.target.value);
                     setSelectedSubcategory('');
-                    setCurrentPage(1);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm"
                 >
@@ -135,10 +127,7 @@ export default function CatalogPage() {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Sub-Categoría</label>
                 <select
                   value={selectedSubcategory}
-                  onChange={(e) => {
-                    setSelectedSubcategory(e.target.value);
-                    setCurrentPage(1);
-                  }}
+                  onChange={(e) => setSelectedSubcategory(e.target.value)}
                   disabled={!selectedCategory}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -170,32 +159,32 @@ export default function CatalogPage() {
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
-                  {paginatedProducts.map((product) => (
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 pb-4">
+                  {filteredProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-1 p-4 border border-gray-100"
+                      className="bg-white rounded-lg shadow hover:shadow-md transition-all p-2 border border-gray-100 flex flex-col"
                     >
                       {product.image_url && (
                         <img
                           src={product.image_url}
                           alt={product.name}
-                          className="w-full h-40 object-cover rounded-lg mb-3"
+                          className="w-full h-24 object-cover rounded mb-2"
                         />
                       )}
-                      <h3 className="font-semibold text-lg text-gray-900 mb-1">{product.name}</h3>
+                      <h3 className="font-semibold text-xs text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
                       
                       {(product.category || product.subcategory) && (
-                        <div className="mb-2">
-                          <div className="flex gap-2 flex-wrap">
+                        <div className="mb-1 flex-grow">
+                          <div className="flex gap-1 flex-wrap">
                             {product.category && (
-                              <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
+                              <span className="inline-block bg-orange-100 text-orange-800 px-1 py-0.5 rounded text-xs font-semibold">
                                 {product.category}
                               </span>
                             )}
                             {product.subcategory && (
-                              <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                              <span className="inline-block bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-xs font-semibold">
                                 {product.subcategory}
                               </span>
                             )}
@@ -203,64 +192,22 @@ export default function CatalogPage() {
                         </div>
                       )}
                       
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                      
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-2xl font-bold text-orange-600">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-lg font-bold text-orange-600">
                           ${product.price.toFixed(2)}
                         </span>
                       </div>
                       
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 rounded-lg font-semibold hover:shadow-lg transition"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded text-xs font-semibold transition"
                       >
-                        Agregar al carrito
+                        Agregar
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {totalPages > 1 && (
-                <div className="flex-shrink-0 border-t border-gray-200 p-4 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-50 to-slate-50">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
-                  >
-                    ← Anterior
-                  </button>
-                  
-                  <div className="flex gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-10 h-10 rounded-lg font-semibold transition ${
-                          currentPage === page
-                            ? 'bg-orange-600 text-white'
-                            : 'border border-gray-300 hover:bg-gray-100'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                  </div>
-                  
-                  <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
-                  >
-                    Siguiente →
-                  </button>
-
-                  <span className="ml-4 text-sm text-gray-600 font-semibold">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                </div>
-              )}
             </>
           )}
         </div>
