@@ -107,7 +107,7 @@ export const importExportService = {
     pdf.text(`Generado: ${new Date().toLocaleString('es-AR')}`, margin, yPosition);
     yPosition += 10;
 
-    addSection('📊 Resumen General');
+    addSection('Resumen General');
     addText('Total de Ventas', dashboardData.total_sales.toString(), true);
     addText('Ingresos Totales', `$${dashboardData.total_revenue.toFixed(2)}`, true);
     addText('Items Vendidos', dashboardData.total_items_sold.toString(), true);
@@ -118,7 +118,7 @@ export const importExportService = {
     const avgDaily = dashboardData.total_revenue / (totalDays || 1);
     addText('Promedio Diario', `$${avgDaily.toFixed(2)}`);
 
-    addSection('🏪 Ventas por Negocio');
+    addSection('Ventas por Negocio');
     for (let posNum = 1; posNum <= 3; posNum++) {
       const posSales = allSales.filter((s) => s.pos_number === posNum);
       if (posSales.length === 0) continue;
@@ -149,7 +149,7 @@ export const importExportService = {
       yPosition += 2;
     }
 
-    addSection('🏆 Productos Más Vendidos (Top 5)');
+    addSection('Productos Mas Vendidos (Top 5)');
     const topProducts = dashboardData.top_products.slice(0, 5);
     topProducts.forEach((p: any, idx: number) => {
       if (yPosition > 270) {

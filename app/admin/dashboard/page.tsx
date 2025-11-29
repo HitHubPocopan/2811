@@ -18,6 +18,24 @@ export default function AdminDashboardPage() {
   const [allSales, setAllSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchStats = async () => {
+    const adminData = await salesService.getAdminDashboard();
+    const sales = await salesService.getAllSales();
+    
+    setStats(adminData);
+    setAllSales(sales);
+
+    const posDataArray = [];
+    for (let i = 1; i <= 3; i++) {
+      const posData = await salesService.getPosDashboard(``, i);
+      if (posData) posDataArray.push(posData);
+    }
+    setPosStats(posDataArray);
+
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -25,25 +43,14 @@ export default function AdminDashboardPage() {
       return;
     }
 
-    const fetchStats = async () => {
-      const adminData = await salesService.getAdminDashboard();
-      const sales = await salesService.getAllSales();
-      
-      setStats(adminData);
-      setAllSales(sales);
-
-      const posDataArray = [];
-      for (let i = 1; i <= 3; i++) {
-        const posData = await salesService.getPosDashboard(``, i);
-        if (posData) posDataArray.push(posData);
-      }
-      setPosStats(posDataArray);
-
-      setLoading(false);
-    };
-
     fetchStats();
   }, [user, router]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchStats();
+    setRefreshing(false);
+  };
 
   const handleExportPDF = async () => {
     if (!stats) return;
@@ -64,18 +71,27 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar />
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
-        <div className="mb-8 flex justify-between items-start">
+        <div className="mb-8 flex justify-between items-start gap-4">
           <div>
             <h1 className="text-4xl font-bold text-gray-900">Dashboard Administrativo</h1>
             <p className="text-gray-600 mt-2">Visión consolidada de todos los puntos de venta</p>
           </div>
-          <button
-            onClick={handleExportPDF}
-            disabled={exporting || !stats}
-            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {exporting ? '⏳ Generando...' : '📄 Exportar Insights PDF'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {refreshing ? 'Actualizando...' : 'Actualizar'}
+            </button>
+            <button
+              onClick={handleExportPDF}
+              disabled={exporting || !stats}
+              className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {exporting ? 'Generando...' : 'Exportar PDF'}
+            </button>
+          </div>
         </div>
 
         {loading ? (
