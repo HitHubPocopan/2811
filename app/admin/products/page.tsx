@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
+import { importExportService } from '@/lib/services/import-export';
 import { Product } from '@/lib/types';
 
 export default function ProductsPage() {
@@ -14,6 +15,8 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -96,6 +99,45 @@ export default function ProductsPage() {
     setShowForm(false);
   };
 
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    setImportMessage('');
+
+    try {
+      const importedProducts = await importExportService.importProductsFromExcel(file);
+
+      if (importedProducts.length === 0) {
+        setImportMessage('❌ El archivo está vacío');
+        setImporting(false);
+        return;
+      }
+
+      let successCount = 0;
+      for (const product of importedProducts) {
+        const result = await productService.create(product);
+        if (result) successCount++;
+      }
+
+      const allProducts = await productService.getAll();
+      setProducts(allProducts);
+
+      setImportMessage(`✅ ${successCount} productos importados correctamente`);
+      setTimeout(() => setImportMessage(''), 5000);
+    } catch (error) {
+      setImportMessage('❌ Error al importar el archivo');
+    }
+
+    setImporting(false);
+    e.target.value = '';
+  };
+
+  const handleExportExcel = async () => {
+    await importExportService.exportProductsToExcel(products);
+  };
+
   if (!user) {
     return null;
   }
@@ -110,14 +152,40 @@ export default function ProductsPage() {
             <p className="text-gray-600 mt-2">Administra tu catálogo de productos</p>
           </div>
           {!showForm && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
-            >
-              + Nuevo producto
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleExportExcel}
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
+              >
+                ⬇️ Exportar Excel
+              </button>
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleImportExcel}
+                  disabled={importing}
+                  className="hidden"
+                />
+                <span className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold">
+                  {importing ? '⏳ Importando...' : '⬆️ Importar Excel'}
+                </span>
+              </label>
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
+              >
+                + Nuevo producto
+              </button>
+            </div>
           )}
         </div>
+
+        {importMessage && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6 font-semibold">
+            {importMessage}
+          </div>
+        )}
 
         {showForm && (
           <div className="bg-white rounded-xl shadow-md p-6 lg:p-8 mb-8">

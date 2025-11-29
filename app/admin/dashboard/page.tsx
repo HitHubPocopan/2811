@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
 import { salesService } from '@/lib/services/sales';
-import { DashboardStats, POSDashboardStats } from '@/lib/types';
+import { importExportService } from '@/lib/services/import-export';
+import { DashboardStats, POSDashboardStats, Sale } from '@/lib/types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function AdminDashboardPage() {
@@ -14,7 +15,9 @@ export default function AdminDashboardPage() {
   const { user } = useAuthStore();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [posStats, setPosStats] = useState<POSDashboardStats[]>([]);
+  const [allSales, setAllSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -24,7 +27,10 @@ export default function AdminDashboardPage() {
 
     const fetchStats = async () => {
       const adminData = await salesService.getAdminDashboard();
+      const sales = await salesService.getAllSales();
+      
       setStats(adminData);
+      setAllSales(sales);
 
       const posDataArray = [];
       for (let i = 1; i <= 3; i++) {
@@ -39,6 +45,17 @@ export default function AdminDashboardPage() {
     fetchStats();
   }, [user, router]);
 
+  const handleExportPDF = async () => {
+    if (!stats) return;
+    setExporting(true);
+    try {
+      await importExportService.exportInsightsToPDF(stats, allSales);
+    } catch (error) {
+      console.error('Error al exportar PDF:', error);
+    }
+    setExporting(false);
+  };
+
   if (!user) {
     return null;
   }
@@ -47,9 +64,18 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar />
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">Dashboard Administrativo</h1>
-          <p className="text-gray-600 mt-2">Visión consolidada de todos los puntos de venta</p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900">Dashboard Administrativo</h1>
+            <p className="text-gray-600 mt-2">Visión consolidada de todos los puntos de venta</p>
+          </div>
+          <button
+            onClick={handleExportPDF}
+            disabled={exporting || !stats}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {exporting ? '⏳ Generando...' : '📄 Exportar Insights PDF'}
+          </button>
         </div>
 
         {loading ? (
