@@ -14,6 +14,10 @@ export default function SalesHistoryPage() {
   const { user } = useAuthStore();
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteMessage, setDeleteMessage] = useState('');
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -30,6 +34,32 @@ export default function SalesHistoryPage() {
     fetchSales();
   }, [user, router]);
 
+  const handleDeleteSale = async () => {
+    const CORRECT_PASSWORD = '1004';
+
+    if (deletePassword !== CORRECT_PASSWORD) {
+      setDeleteMessage('Contraseña incorrecta');
+      return;
+    }
+
+    if (!selectedSaleId) return;
+
+    try {
+      const success = await salesService.deleteSale(selectedSaleId);
+      if (success) {
+        setSales(sales.filter((sale) => sale.id !== selectedSaleId));
+        setShowDeleteModal(false);
+        setSelectedSaleId(null);
+        setDeletePassword('');
+        setDeleteMessage('');
+      } else {
+        setDeleteMessage('Error al eliminar la venta');
+      }
+    } catch {
+      setDeleteMessage('Error al eliminar la venta');
+    }
+  };
+
   if (!user) {
     return null;
   }
@@ -37,6 +67,55 @@ export default function SalesHistoryPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
+      
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Eliminar venta</h3>
+            <p className="text-gray-600 mb-4">Ingresa la contraseña para confirmar</p>
+            
+            {deleteMessage && (
+              <div className={`p-3 rounded-lg mb-4 text-sm font-semibold ${deleteMessage.includes('incorrecta') ? 'bg-red-50 text-red-700' : 'bg-red-50 text-red-700'}`}>
+                {deleteMessage}
+              </div>
+            )}
+            
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Ingresa la contraseña"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 text-sm"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleDeleteSale();
+                }
+              }}
+            />
+            
+            <div className="flex gap-2">
+              <button
+                onClick={handleDeleteSale}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition"
+              >
+                Eliminar
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedSaleId(null);
+                  setDeletePassword('');
+                  setDeleteMessage('');
+                }}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-semibold text-sm transition"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-6xl mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6">Historial de ventas</h1>
 
@@ -55,6 +134,7 @@ export default function SalesHistoryPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold">Cantidad items</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Total</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Detalles</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -93,6 +173,19 @@ export default function SalesHistoryPage() {
                           ))}
                         </div>
                       </details>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <button
+                        onClick={() => {
+                          setSelectedSaleId(sale.id);
+                          setShowDeleteModal(true);
+                          setDeletePassword('');
+                          setDeleteMessage('');
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold transition"
+                      >
+                        Eliminar
+                      </button>
                     </td>
                   </tr>
                 ))}

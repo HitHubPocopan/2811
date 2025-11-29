@@ -52,6 +52,23 @@ export const salesService = {
     }
   },
 
+  async deleteSale(saleId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('sales')
+        .delete()
+        .eq('id', saleId);
+
+      if (error) {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
   async getAllSales(limit = 100): Promise<Sale[]> {
     try {
       const { data, error } = await supabase
