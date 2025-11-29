@@ -22,6 +22,9 @@ export default function ProductsPage() {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
   const [subcategories, setSubcategories] = useState<string[]>([]);
+  const [showDeleteCatalogModal, setShowDeleteCatalogModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteMessage, setDeleteMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -120,6 +123,32 @@ export default function ProductsPage() {
     setFormData({ name: '', description: '', price: '', category: '', subcategory: '', image_url: '' });
     setEditingId(null);
     setShowForm(false);
+  };
+
+  const handleDeleteAllCatalog = async () => {
+    const CORRECT_PASSWORD = 'laviudanegradebernal1994';
+
+    if (deletePassword !== CORRECT_PASSWORD) {
+      setDeleteMessage('Contraseña incorrecta');
+      return;
+    }
+
+    try {
+      let successCount = 0;
+      for (const product of products) {
+        const success = await productService.delete(product.id);
+        if (success) successCount++;
+      }
+
+      setProducts([]);
+      setCategories([]);
+      setSubcategories([]);
+      setDeletePassword('');
+      setShowDeleteCatalogModal(false);
+      setDeleteMessage('');
+    } catch {
+      setDeleteMessage('Error al eliminar el catálogo');
+    }
   };
 
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -261,6 +290,16 @@ export default function ProductsPage() {
               >
                 + Nuevo producto
               </button>
+              <button
+                onClick={() => {
+                  setShowDeleteCatalogModal(true);
+                  setDeletePassword('');
+                  setDeleteMessage('');
+                }}
+                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
+              >
+                Eliminar Catalogo
+              </button>
             </div>
           )}
         </div>
@@ -268,6 +307,53 @@ export default function ProductsPage() {
         {importMessage && (
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6 font-semibold">
             {importMessage}
+          </div>
+        )}
+
+        {showDeleteCatalogModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-lg p-6 max-w-sm w-full mx-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Eliminar catalogo completo</h3>
+              <p className="text-gray-600 mb-4">Ingresa la contraseña para confirmar</p>
+              
+              {deleteMessage && (
+                <div className={`p-3 rounded-lg mb-4 text-sm font-semibold ${deleteMessage.includes('incorrecta') ? 'bg-red-50 text-red-700' : 'bg-red-50 text-red-700'}`}>
+                  {deleteMessage}
+                </div>
+              )}
+              
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Ingresa la contraseña"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 text-sm"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleDeleteAllCatalog();
+                  }
+                }}
+              />
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDeleteAllCatalog}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition"
+                >
+                  Eliminar
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteCatalogModal(false);
+                    setDeletePassword('');
+                    setDeleteMessage('');
+                  }}
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-semibold text-sm transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
