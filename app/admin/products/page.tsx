@@ -18,7 +18,8 @@ export default function ProductsPage() {
     name: '',
     description: '',
     price: '',
-    stock: '',
+    category: '',
+    subcategory: '',
     image_url: '',
   });
 
@@ -44,8 +45,10 @@ export default function ProductsPage() {
       name: formData.name,
       description: formData.description,
       price: parseFloat(formData.price),
-      stock: parseInt(formData.stock),
+      category: formData.category || undefined,
+      subcategory: formData.subcategory || undefined,
       image_url: formData.image_url,
+      stock: 0,
     };
 
     if (editingId) {
@@ -61,7 +64,7 @@ export default function ProductsPage() {
       }
     }
 
-    setFormData({ name: '', description: '', price: '', stock: '', image_url: '' });
+    setFormData({ name: '', description: '', price: '', category: '', subcategory: '', image_url: '' });
     setShowForm(false);
   };
 
@@ -70,7 +73,8 @@ export default function ProductsPage() {
       name: product.name,
       description: product.description,
       price: product.price.toString(),
-      stock: product.stock.toString(),
+      category: product.category || '',
+      subcategory: product.subcategory || '',
       image_url: product.image_url,
     });
     setEditingId(product.id);
@@ -87,7 +91,7 @@ export default function ProductsPage() {
   };
 
   const handleCancel = () => {
-    setFormData({ name: '', description: '', price: '', stock: '', image_url: '' });
+    setFormData({ name: '', description: '', price: '', category: '', subcategory: '', image_url: '' });
     setEditingId(null);
     setShowForm(false);
   };
@@ -160,26 +164,36 @@ export default function ProductsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
                   <input
-                    type="number"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    required
+                    type="text"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
-                    placeholder="0"
+                    placeholder="Ej: Computadoras"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">URL de imagen</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Sub-Categoría</label>
                   <input
-                    type="url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    type="text"
+                    value={formData.subcategory}
+                    onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
-                    placeholder="https://..."
+                    placeholder="Ej: Laptops"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">URL de imagen</label>
+                <input
+                  type="url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+                  placeholder="https://..."
+                />
               </div>
 
               <div className="flex gap-4 pt-4">
@@ -216,9 +230,8 @@ export default function ProductsPage() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nombre</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Descripción</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Categoría</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Precio</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Stock</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Acciones</th>
                 </tr>
               </thead>
@@ -226,14 +239,24 @@ export default function ProductsPage() {
                 {products.map((product) => (
                   <tr key={product.id} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">{product.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 truncate">{product.description}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="font-bold text-orange-600">${product.price.toFixed(2)}</span>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {product.category ? (
+                        <div className="flex gap-2">
+                          <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
+                            {product.category}
+                          </span>
+                          {product.subcategory && (
+                            <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                              {product.subcategory}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">Sin categoría</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.stock > 10 ? 'bg-green-100 text-green-800' : product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
-                        {product.stock}
-                      </span>
+                      <span className="font-bold text-orange-600">${product.price.toFixed(2)}</span>
                     </td>
                     <td className="px-6 py-4 text-sm space-x-2">
                       <button

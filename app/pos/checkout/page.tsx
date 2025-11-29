@@ -57,10 +57,6 @@ export default function CheckoutPage() {
     const sale = await salesService.createSale(user.id, user.pos_number || 0, saleItems, total);
 
     if (sale) {
-      for (const item of items) {
-        await productService.updateStock(item.product_id, item.quantity);
-      }
-
       clearCart();
       router.push('/pos/confirmation');
     } else {
