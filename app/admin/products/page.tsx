@@ -177,9 +177,9 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col overflow-hidden">
       <Navbar />
-      <div className="max-w-7xl mx-auto p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto p-6 lg:p-8 flex-1 flex flex-col overflow-hidden w-full">
         <div className="flex justify-between items-start mb-8 gap-6">
           <div className="flex-1">
             <h1 className="text-4xl font-bold text-gray-900">Gestión de Productos</h1>
@@ -367,17 +367,18 @@ export default function ProductsPage() {
           </div>
         )}
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <p className="text-gray-600 text-lg font-medium">{searchTerm || selectedCategory || selectedSubcategory ? 'No hay productos que coincidan' : 'No hay productos'}</p>
-            <p className="text-gray-500 mt-2">{products.length === 0 ? 'Crea tu primer producto para comenzar' : 'Intenta con otros filtros'}</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <p className="text-gray-600 text-lg font-medium">{searchTerm || selectedCategory || selectedSubcategory ? 'No hay productos que coincidan' : 'No hay productos'}</p>
+              <p className="text-gray-500 mt-2">{products.length === 0 ? 'Crea tu primer producto para comenzar' : 'Intenta con otros filtros'}</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
@@ -428,8 +429,9 @@ export default function ProductsPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
