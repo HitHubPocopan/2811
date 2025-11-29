@@ -213,10 +213,9 @@ export default function CatalogPage() {
                       
                       <button
                         onClick={() => handleAddToCart(product)}
-                        disabled={product.stock === 0}
-                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 rounded-lg font-semibold hover:shadow-lg transition"
                       >
-                        {product.stock > 0 ? 'Agregar al carrito' : 'Sin stock'}
+                        Agregar al carrito
                       </button>
                     </div>
                   ))}
