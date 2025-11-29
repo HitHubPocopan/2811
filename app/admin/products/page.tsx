@@ -17,6 +17,11 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [subcategories, setSubcategories] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -32,14 +37,32 @@ export default function ProductsPage() {
       return;
     }
 
-    const fetchProducts = async () => {
-      const data = await productService.getAll();
-      setProducts(data);
+    const fetchData = async () => {
+      const [productsData, categoriesData] = await Promise.all([
+        productService.getAll(),
+        productService.getCategories(),
+      ]);
+      setProducts(productsData);
+      setCategories(categoriesData);
       setLoading(false);
     };
 
-    fetchProducts();
+    fetchData();
   }, [user, router]);
+
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (selectedCategory) {
+        const subcats = await productService.getSubcategories(selectedCategory);
+        setSubcategories(subcats);
+        setSelectedSubcategory('');
+      } else {
+        setSubcategories([]);
+      }
+    };
+
+    fetchSubcategories();
+  }, [selectedCategory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,10 +147,10 @@ export default function ProductsPage() {
       const allProducts = await productService.getAll();
       setProducts(allProducts);
 
-      setImportMessage(`✅ ${successCount} productos importados correctamente`);
+      setImportMessage(`${successCount} productos importados correctamente`);
       setTimeout(() => setImportMessage(''), 5000);
-    } catch (error) {
-      setImportMessage('❌ Error al importar el archivo');
+    } catch {
+      setImportMessage('Error al importar el archivo');
     }
 
     setImporting(false);
@@ -138,6 +161,17 @@ export default function ProductsPage() {
     await importExportService.exportProductsToExcel(products);
   };
 
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = !selectedCategory || product.category === selectedCategory;
+    const matchesSubcategory = !selectedSubcategory || product.subcategory === selectedSubcategory;
+
+    return matchesSearch && matchesCategory && matchesSubcategory;
+  });
+
   if (!user) {
     return null;
   }
@@ -146,10 +180,60 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navbar />
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
+        <div className="flex justify-between items-start mb-8 gap-6">
+          <div className="flex-1">
             <h1 className="text-4xl font-bold text-gray-900">Gestión de Productos</h1>
-            <p className="text-gray-600 mt-2">Administra tu catálogo de productos</p>
+            <p className="text-gray-600 mt-2">Administra tu catálogo de productos ({filteredProducts.length} de {products.length})</p>
+            
+            {!showForm && (
+              <div className="mt-4 space-y-3">
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o descripción..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm text-sm"
+                />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Categoría</label>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => {
+                        setSelectedCategory(e.target.value);
+                        setSelectedSubcategory('');
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm"
+                    >
+                      <option value="">Todas ({categories.length})</option>
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Sub-Categoría</label>
+                    <select
+                      value={selectedSubcategory}
+                      onChange={(e) => setSelectedSubcategory(e.target.value)}
+                      disabled={!selectedCategory}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Todas ({subcategories.length})</option>
+                      {subcategories.map((subcat) => (
+                        <option key={subcat} value={subcat}>
+                          {subcat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           {!showForm && (
             <div className="flex gap-3">
@@ -157,7 +241,7 @@ export default function ProductsPage() {
                 onClick={handleExportExcel}
                 className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
               >
-                ⬇️ Exportar Excel
+                Exportar Excel
               </button>
               <label className="cursor-pointer">
                 <input
@@ -168,7 +252,7 @@ export default function ProductsPage() {
                   className="hidden"
                 />
                 <span className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold">
-                  {importing ? '⏳ Importando...' : '⬆️ Importar Excel'}
+                  {importing ? 'Importando...' : 'Importar Excel'}
                 </span>
               </label>
               <button
@@ -287,10 +371,10 @@ export default function ProductsPage() {
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
           </div>
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <p className="text-gray-600 text-lg font-medium">📦 No hay productos</p>
-            <p className="text-gray-500 mt-2">Crea tu primer producto para comenzar</p>
+            <p className="text-gray-600 text-lg font-medium">{searchTerm || selectedCategory || selectedSubcategory ? 'No hay productos que coincidan' : 'No hay productos'}</p>
+            <p className="text-gray-500 mt-2">{products.length === 0 ? 'Crea tu primer producto para comenzar' : 'Intenta con otros filtros'}</p>
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -304,7 +388,7 @@ export default function ProductsPage() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr key={product.id} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">{product.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">

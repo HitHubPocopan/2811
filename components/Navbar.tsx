@@ -22,43 +22,43 @@ export function Navbar() {
   }
 
   return (
-    <nav className="bg-orange-600 text-white p-4 shadow-lg">
+    <nav className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-6 py-3 shadow-md" style={{ WebkitFontSmoothing: 'antialiased' }}>
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-8">
-          <Link href="/" className="text-xl font-bold">
+          <Link href="/" className="text-lg font-bold">
             Sistema de Ventas
           </Link>
           {user.role === 'admin' && (
             <>
-              <Link href="/admin/dashboard" className="hover:underline">
+              <Link href="/admin/dashboard" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
                 Dashboard
               </Link>
-              <Link href="/admin/products" className="hover:underline">
+              <Link href="/admin/products" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
                 Productos
               </Link>
             </>
           )}
           {user.role === 'pos' && (
             <>
-              <Link href="/pos/catalog" className="hover:underline">
-                Catálogo
+              <Link href="/pos/catalog" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
+                Catalogo
               </Link>
-              <Link href="/pos/sales" className="hover:underline">
+              <Link href="/pos/sales" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
                 Historial
               </Link>
-              <Link href="/pos/stats" className="hover:underline">
-                Estadísticas
+              <Link href="/pos/stats" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
+                Estadisticas
               </Link>
             </>
           )}
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm">
+          <span className="text-sm font-medium">
             {user.role === 'admin' ? 'Admin' : user.name || `POS ${user.pos_number}`}
           </span>
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
+            className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold transition"
           >
             Salir
           </button>

@@ -85,7 +85,7 @@ export default function CatalogPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col overflow-hidden" style={{ WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility' }}>
       <Navbar />
       <div className="flex-1 flex overflow-hidden gap-6 p-6 lg:p-8">
         <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-lg">
@@ -97,7 +97,7 @@ export default function CatalogPage() {
             
             <input
               type="text"
-              placeholder="🔍 Buscar productos..."
+              placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm mb-4"
@@ -173,18 +173,18 @@ export default function CatalogPage() {
                           className="w-full h-24 object-cover rounded mb-2"
                         />
                       )}
-                      <h3 className="font-semibold text-xs text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
+                      <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
                       
                       {(product.category || product.subcategory) && (
                         <div className="mb-1 flex-grow">
                           <div className="flex gap-1 flex-wrap">
                             {product.category && (
-                              <span className="inline-block bg-orange-100 text-orange-800 px-1 py-0.5 rounded text-xs font-semibold">
+                              <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
                                 {product.category}
                               </span>
                             )}
                             {product.subcategory && (
-                              <span className="inline-block bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-xs font-semibold">
+                              <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
                                 {product.subcategory}
                               </span>
                             )}
