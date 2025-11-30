@@ -39,7 +39,7 @@ export default function ConfirmationPage() {
 
           <button
             onClick={() => router.push('/pos/catalog')}
-            className="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition font-semibold"
+            className="bg-brand-600 text-white px-8 py-3 rounded-lg hover:bg-brand-700 transition font-semibold"
           >
             Continuar comprando
           </button>

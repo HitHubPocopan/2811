@@ -22,7 +22,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-6 py-3 shadow-md" style={{ WebkitFontSmoothing: 'antialiased' }}>
+    <nav className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 shadow-md" style={{ WebkitFontSmoothing: 'antialiased' }}>
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-8">
           <Link href="/" className="text-lg font-bold">
@@ -30,23 +30,23 @@ export function Navbar() {
           </Link>
           {user.role === 'admin' && (
             <>
-              <Link href="/admin/dashboard" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
+              <Link href="/admin/dashboard" className="text-sm font-medium hover:bg-white hover:text-brand-600 px-3 py-2 rounded transition">
                 Dashboard
               </Link>
-              <Link href="/admin/products" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
+              <Link href="/admin/products" className="text-sm font-medium hover:bg-white hover:text-brand-600 px-3 py-2 rounded transition">
                 Productos
               </Link>
             </>
           )}
           {user.role === 'pos' && (
             <>
-              <Link href="/pos/catalog" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
+              <Link href="/pos/catalog" className="text-sm font-medium hover:bg-white hover:text-brand-600 px-3 py-2 rounded transition">
                 Catalogo
               </Link>
-              <Link href="/pos/sales" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
+              <Link href="/pos/sales" className="text-sm font-medium hover:bg-white hover:text-brand-600 px-3 py-2 rounded transition">
                 Historial
               </Link>
-              <Link href="/pos/stats" className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition">
+              <Link href="/pos/stats" className="text-sm font-medium hover:bg-white hover:text-brand-600 px-3 py-2 rounded transition">
                 Estadisticas
               </Link>
             </>

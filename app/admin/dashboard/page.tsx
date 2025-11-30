@@ -96,18 +96,18 @@ export default function AdminDashboardPage() {
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
           </div>
         ) : stats ? (
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border-l-4 border-orange-500">
+              <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border-l-4 border-brand-500">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-sm font-medium mb-1">Total de ventas</p>
                     <p className="text-4xl font-bold text-gray-900">{stats.total_sales}</p>
                   </div>
-                  <div className="text-5xl text-orange-100">📊</div>
+                  <div className="text-5xl text-brand-100">📊</div>
                 </div>
               </div>
               <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border-l-4 border-green-500">
@@ -156,7 +156,7 @@ export default function AdminDashboardPage() {
                   <Link key={pos.pos_number} href={`/admin/pos/${pos.pos_number}`}>
                     <div className="bg-white rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer p-6 h-full">
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-orange-100 rounded-lg p-3">
+                        <div className="bg-brand-100 rounded-lg p-3">
                           <span className="text-2xl">🏪</span>
                         </div>
                         <div>
@@ -164,7 +164,7 @@ export default function AdminDashboardPage() {
                           <p className="text-gray-600 text-sm">Punto de Venta</p>
                         </div>
                       </div>
-                      <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold py-2 px-4 rounded-lg hover:shadow-lg transition-shadow">
+                      <button className="w-full bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold py-2 px-4 rounded-lg hover:shadow-lg transition-shadow">
                         Ver Detalles →
                       </button>
                     </div>
@@ -189,10 +189,10 @@ export default function AdminDashboardPage() {
                     </thead>
                     <tbody>
                       {stats.top_products.slice(0, 15).map((product, idx) => (
-                        <tr key={idx} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
+                        <tr key={idx} className="border-b border-gray-100 hover:bg-brand-50 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">{product.product_name}</td>
                           <td className="px-6 py-4 text-sm text-gray-600">
-                            <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-semibold">
+                            <span className="bg-brand-100 text-brand-800 px-3 py-1 rounded-full text-xs font-semibold">
                               {product.quantity}
                             </span>
                           </td>
