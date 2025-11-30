@@ -221,7 +221,7 @@ export default function ProductsPage() {
                   placeholder="Buscar por nombre o descripción..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm text-sm"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm text-sm text-black"
                 />
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -233,7 +233,7 @@ export default function ProductsPage() {
                         setSelectedCategory(e.target.value);
                         setSelectedSubcategory('');
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm text-black"
                     >
                       <option value="">Todas ({categories.length})</option>
                       {categories.map((cat) => (
@@ -250,7 +250,7 @@ export default function ProductsPage() {
                       value={selectedSubcategory}
                       onChange={(e) => setSelectedSubcategory(e.target.value)}
                       disabled={!selectedCategory}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
                     >
                       <option value="">Todas ({subcategories.length})</option>
                       {subcategories.map((subcat) => (
@@ -327,7 +327,7 @@ export default function ProductsPage() {
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
                 placeholder="Ingresa la contraseña"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 text-sm text-black"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                     handleDeleteAllCatalog();

@@ -85,7 +85,7 @@ export default function SalesHistoryPage() {
               value={deletePassword}
               onChange={(e) => setDeletePassword(e.target.value)}
               placeholder="Ingresa la contraseña"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4 text-sm text-black"
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   handleDeleteSale();

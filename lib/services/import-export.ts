@@ -97,6 +97,51 @@ export const importExportService = {
       3: 'Costa Esmeralda',
     };
 
+    const getTopProductsPerPOS = (posNumber: number, limit: number) => {
+      const posSales = allSales.filter((s) => s.pos_number === posNumber);
+      const productMap = new Map<string, { name: string; quantity: number; revenue: number }>();
+
+      posSales.forEach((sale: any) => {
+        sale.items.forEach((item: any) => {
+          const productName = item.product_name || item.name || 'Desconocido';
+          const existing = productMap.get(productName) || {
+            name: productName,
+            quantity: 0,
+            revenue: 0,
+          };
+          existing.quantity += item.quantity;
+          existing.revenue += item.subtotal || item.quantity * (item.price || 0);
+          productMap.set(productName, existing);
+        });
+      });
+
+      return Array.from(productMap.values())
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, limit);
+    };
+
+    const getAllTopProducts = (limit: number) => {
+      const productMap = new Map<string, { name: string; quantity: number; revenue: number }>();
+
+      allSales.forEach((sale: any) => {
+        sale.items.forEach((item: any) => {
+          const productName = item.product_name || item.name || 'Desconocido';
+          const existing = productMap.get(productName) || {
+            name: productName,
+            quantity: 0,
+            revenue: 0,
+          };
+          existing.quantity += item.quantity;
+          existing.revenue += item.subtotal || item.quantity * (item.price || 0);
+          productMap.set(productName, existing);
+        });
+      });
+
+      return Array.from(productMap.values())
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, limit);
+    };
+
     pdf.setFontSize(18);
     pdf.setFont('', 'bold');
     pdf.text('Reporte de Insights - Sistema de Ventas', margin, yPosition);
@@ -160,6 +205,46 @@ export const importExportService = {
       pdf.setFont('', 'normal');
       pdf.text(
         `${idx + 1}. ${p.product_name}: ${p.quantity} unidades - $${p.revenue.toFixed(2)}`,
+        margin + 5,
+        yPosition
+      );
+      yPosition += 6;
+    });
+
+    for (let posNum = 1; posNum <= 3; posNum++) {
+      const posName = POS_NAMES[posNum] || `POS ${posNum}`;
+      const topPosProducts = getTopProductsPerPOS(posNum, 10);
+      
+      if (topPosProducts.length === 0) continue;
+
+      addSection(`Top 10 Productos - ${posName}`);
+      topPosProducts.forEach((p: any, idx: number) => {
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+        pdf.setFontSize(10);
+        pdf.setFont('', 'normal');
+        pdf.text(
+          `${idx + 1}. ${p.name}: ${p.quantity} unidades - $${p.revenue.toFixed(2)}`,
+          margin + 5,
+          yPosition
+        );
+        yPosition += 6;
+      });
+    }
+
+    addSection('Top 20 Productos - Todos los Negocios');
+    const allTopProducts = getAllTopProducts(20);
+    allTopProducts.forEach((p: any, idx: number) => {
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = 10;
+      }
+      pdf.setFontSize(10);
+      pdf.setFont('', 'normal');
+      pdf.text(
+        `${idx + 1}. ${p.name}: ${p.quantity} unidades - $${p.revenue.toFixed(2)}`,
         margin + 5,
         yPosition
       );
