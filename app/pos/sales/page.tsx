@@ -161,7 +161,7 @@ export default function SalesHistoryPage() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <details className="cursor-pointer">
-                        <summary className="text-brand-600 hover:underline">Ver</summary>
+                        <summary className="text-orange-600 hover:underline">Ver</summary>
                         <div className="mt-3 p-3 bg-gray-50 rounded">
                           {sale.items.map((item, idx) => (
                             <div key={idx} className="flex justify-between text-sm py-1">

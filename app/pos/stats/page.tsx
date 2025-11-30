@@ -46,7 +46,7 @@ export default function StatsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white p-6 rounded-lg shadow">
                 <p className="text-gray-600 text-sm font-semibold mb-2">Total de ventas</p>
-                <p className="text-4xl font-bold text-brand-600">{stats.total_sales}</p>
+                <p className="text-4xl font-bold text-orange-600">{stats.total_sales}</p>
               </div>
               <div className="bg-white p-6 rounded-lg shadow">
                 <p className="text-gray-600 text-sm font-semibold mb-2">Ingresos totales</p>

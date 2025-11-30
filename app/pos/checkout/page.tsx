@@ -122,7 +122,7 @@ export default function CheckoutPage() {
           <button
             onClick={handleCompleteSale}
             disabled={processing}
-            className="flex-1 bg-brand-600 text-white py-3 rounded-lg font-bold hover:bg-brand-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {processing ? 'Procesando...' : 'Confirmar venta'}
           </button>

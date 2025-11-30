@@ -89,7 +89,7 @@ export default function CatalogPage() {
       <Navbar />
       <div className="flex-1 flex overflow-hidden gap-6 p-6 lg:p-8">
         <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-lg">
-          <div className="flex-shrink-0 p-6 border-b border-gray-200 bg-gradient-to-r from-brand-50 to-slate-50">
+          <div className="flex-shrink-0 p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-slate-50">
             <h1 className="text-3xl font-bold text-gray-900 mb-1">Catálogo de Productos</h1>
             <p className="text-gray-600 mb-4">
               Mostrando {filteredProducts.length} de {products.length} productos
@@ -100,7 +100,7 @@ export default function CatalogPage() {
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm mb-4 text-black"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm mb-4 text-black"
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -112,7 +112,7 @@ export default function CatalogPage() {
                     setSelectedCategory(e.target.value);
                     setSelectedSubcategory('');
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-sm text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm text-black"
                 >
                   <option value="">Todas ({categories.length})</option>
                   {categories.map((cat) => (
@@ -129,7 +129,7 @@ export default function CatalogPage() {
                   value={selectedSubcategory}
                   onChange={(e) => setSelectedSubcategory(e.target.value)}
                   disabled={!selectedCategory}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
                 >
                   <option value="">Todas ({subcategories.length})</option>
                   {subcategories.map((subcat) => (
@@ -145,7 +145,7 @@ export default function CatalogPage() {
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">Cargando productos...</p>
               </div>
             </div>
@@ -179,7 +179,7 @@ export default function CatalogPage() {
                         <div className="mb-1 flex-grow">
                           <div className="flex gap-1 flex-wrap">
                             {product.category && (
-                              <span className="inline-block bg-brand-100 text-brand-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
+                              <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
                                 {product.category}
                               </span>
                             )}
@@ -193,14 +193,14 @@ export default function CatalogPage() {
                       )}
                       
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-lg font-bold text-brand-600">
+                        <span className="text-lg font-bold text-orange-600">
                           ${product.price.toFixed(2)}
                         </span>
                       </div>
                       
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="w-full bg-brand-500 hover:bg-brand-600 text-white py-1 px-2 rounded text-xs font-semibold transition"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded text-xs font-semibold transition"
                       >
                         Agregar
                       </button>

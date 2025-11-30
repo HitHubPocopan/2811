@@ -221,7 +221,7 @@ export default function ProductsPage() {
                   placeholder="Buscar por nombre o descripción..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 shadow-sm text-sm text-black"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm text-sm text-black"
                 />
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -233,7 +233,7 @@ export default function ProductsPage() {
                         setSelectedCategory(e.target.value);
                         setSelectedSubcategory('');
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-sm text-black"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm text-black"
                     >
                       <option value="">Todas ({categories.length})</option>
                       {categories.map((cat) => (
@@ -250,7 +250,7 @@ export default function ProductsPage() {
                       value={selectedSubcategory}
                       onChange={(e) => setSelectedSubcategory(e.target.value)}
                       disabled={!selectedCategory}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
                     >
                       <option value="">Todas ({subcategories.length})</option>
                       {subcategories.map((subcat) => (
@@ -286,7 +286,7 @@ export default function ProductsPage() {
               </label>
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-gradient-to-r from-brand-500 to-brand-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
               >
                 + Nuevo producto
               </button>
@@ -371,7 +371,7 @@ export default function ProductsPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-sm text-black"
                     placeholder="Ej: Laptop Gaming"
                   />
                 </div>
@@ -383,7 +383,7 @@ export default function ProductsPage() {
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-sm text-black"
                     placeholder="0.00"
                   />
                 </div>
@@ -394,7 +394,7 @@ export default function ProductsPage() {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-sm text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-sm text-black"
                   placeholder="Describe el producto..."
                   rows={2}
                 />
@@ -407,7 +407,7 @@ export default function ProductsPage() {
                     type="text"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-sm text-black"
                     placeholder="Ej: Computadoras"
                   />
                 </div>
@@ -417,7 +417,7 @@ export default function ProductsPage() {
                     type="text"
                     value={formData.subcategory}
                     onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-sm text-black"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-sm text-black"
                     placeholder="Ej: Laptops"
                   />
                 </div>
@@ -429,7 +429,7 @@ export default function ProductsPage() {
                   type="url"
                   value={formData.image_url}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 transition text-sm text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition text-sm text-black"
                   placeholder="https://..."
                 />
               </div>
@@ -437,7 +437,7 @@ export default function ProductsPage() {
               <div className="flex gap-2 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm"
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm"
                 >
                   {editingId ? 'Guardar' : 'Crear'}
                 </button>
@@ -456,7 +456,7 @@ export default function ProductsPage() {
         <div className="flex-1 overflow-y-auto min-h-0">
           {loading ? (
             <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="bg-white rounded-xl shadow-md p-12 text-center">
@@ -476,12 +476,12 @@ export default function ProductsPage() {
               </thead>
               <tbody>
                 {filteredProducts.map((product) => (
-                  <tr key={product.id} className="border-b border-gray-100 hover:bg-brand-50 transition-colors">
+                  <tr key={product.id} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">{product.name}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {product.category ? (
                         <div className="flex gap-2">
-                          <span className="inline-block bg-brand-100 text-brand-800 px-2 py-1 rounded text-xs font-semibold">
+                          <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
                             {product.category}
                           </span>
                           {product.subcategory && (
@@ -495,12 +495,12 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span className="font-bold text-brand-600">${product.price.toFixed(2)}</span>
+                      <span className="font-bold text-orange-600">${product.price.toFixed(2)}</span>
                     </td>
                     <td className="px-6 py-4 text-sm space-x-2">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition"
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition"
                       >
                         Editar
                       </button>
