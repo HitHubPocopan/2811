@@ -192,4 +192,36 @@ export const salesService = {
       return null;
     }
   },
+
+  async getTodaySalesTotal(posNumber: number): Promise<number> {
+    try {
+      const now = new Date();
+      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+      
+      let startOfDay = new Date(argentinaTime);
+      startOfDay.setHours(3, 0, 0, 0);
+      
+      if (argentinaTime.getHours() < 3) {
+        startOfDay.setDate(startOfDay.getDate() - 1);
+      }
+      
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setDate(endOfDay.getDate() + 1);
+
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('*')
+        .eq('pos_number', posNumber)
+        .gte('created_at', startOfDay.toISOString())
+        .lt('created_at', endOfDay.toISOString());
+
+      if (error || !sales) {
+        return 0;
+      }
+
+      return sales.reduce((sum, sale) => sum + sale.total, 0);
+    } catch {
+      return 0;
+    }
+  },
 };
