@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { Cart } from '@/components/Cart';
 import { useAuthStore, useCartStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
+import { salesService } from '@/lib/services/sales';
 import { Product } from '@/lib/types';
 
 
@@ -21,6 +22,7 @@ export default function CatalogPage() {
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [categories, setCategories] = useState<string[]>([]);
   const [subcategories, setSubcategories] = useState<string[]>([]);
+  const [todayTotal, setTodayTotal] = useState(0);
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -40,6 +42,19 @@ export default function CatalogPage() {
 
     fetchData();
   }, [user, router]);
+
+  useEffect(() => {
+    const fetchTodayTotal = async () => {
+      if (user && user.role === 'pos' && user.pos_number) {
+        const total = await salesService.getTodaySalesTotal(user.pos_number);
+        setTodayTotal(total);
+      }
+    };
+
+    fetchTodayTotal();
+    const interval = setInterval(fetchTodayTotal, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     const fetchSubcategories = async () => {
@@ -90,10 +105,18 @@ export default function CatalogPage() {
       <div className="flex-1 flex overflow-hidden gap-6 p-6 lg:p-8">
         <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-lg">
           <div className="flex-shrink-0 p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-slate-50">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Catálogo de Productos</h1>
-            <p className="text-gray-600 mb-4">
-              Mostrando {filteredProducts.length} de {products.length} productos
-            </p>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-1">Catálogo de Productos</h1>
+                <p className="text-gray-600">
+                  Mostrando {filteredProducts.length} de {products.length} productos
+                </p>
+              </div>
+              <div className="bg-white rounded-lg shadow p-3 border-2 border-orange-200 text-right">
+                <p className="text-xs font-semibold text-gray-600 mb-1">VENDIDO HOY</p>
+                <p className="text-2xl font-bold text-orange-600">${todayTotal.toFixed(2)}</p>
+              </div>
+            </div>
             
             <input
               type="text"
