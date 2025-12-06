@@ -60,7 +60,7 @@ export const importExportService = {
     XLSX.writeFile(workbook, `productos_${new Date().toISOString().split('T')[0]}.xlsx`);
   },
 
-  async exportInsightsToPDF(dashboardData: any, allSales: any[]): Promise<void> {
+  async exportInsightsToPDF(dashboardData: any, allSales: any[], salesPerDay: any[] = []): Promise<void> {
     const pdf = new jsPDF();
     let yPosition = 10;
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -194,62 +194,98 @@ export const importExportService = {
       yPosition += 2;
     }
 
-    addSection('Productos Mas Vendidos (Top 5)');
-    const topProducts = dashboardData.top_products.slice(0, 5);
-    topProducts.forEach((p: any, idx: number) => {
-      if (yPosition > 270) {
+    addSection('Ventas por Día (Últimos 200 días)');
+    if (salesPerDay.length > 0) {
+      pdf.setFontSize(9);
+      const columnWidth = (pageWidth - 2 * margin) / 5;
+      const tableData = salesPerDay.slice(-30).map((day) => [
+        day.date,
+        `$${day.total.toFixed(0)}`,
+        `$${day.pos1.toFixed(0)}`,
+        `$${day.pos2.toFixed(0)}`,
+        `$${day.pos3.toFixed(0)}`,
+      ]);
+
+      if (yPosition > 200) {
         pdf.addPage();
         yPosition = 10;
       }
-      pdf.setFontSize(10);
+
+      pdf.setFont('', 'bold');
+      pdf.text('Fecha', margin, yPosition);
+      pdf.text('Total Redes', margin + columnWidth, yPosition);
+      pdf.text('Costa del Este', margin + columnWidth * 2, yPosition);
+      pdf.text('Mar de las Pampas', margin + columnWidth * 3, yPosition);
+      pdf.text('Costa Esmeralda', margin + columnWidth * 4, yPosition);
+      yPosition += 5;
+
       pdf.setFont('', 'normal');
-      pdf.text(
-        `${idx + 1}. ${p.product_name}: ${p.quantity} unidades - $${p.revenue.toFixed(2)}`,
-        margin + 5,
-        yPosition
-      );
-      yPosition += 6;
-    });
-
-    for (let posNum = 1; posNum <= 3; posNum++) {
-      const posName = POS_NAMES[posNum] || `POS ${posNum}`;
-      const topPosProducts = getTopProductsPerPOS(posNum, 10);
-      
-      if (topPosProducts.length === 0) continue;
-
-      addSection(`Top 10 Productos - ${posName}`);
-      topPosProducts.forEach((p: any, idx: number) => {
+      tableData.forEach((row) => {
         if (yPosition > 270) {
           pdf.addPage();
           yPosition = 10;
         }
-        pdf.setFontSize(10);
-        pdf.setFont('', 'normal');
-        pdf.text(
-          `${idx + 1}. ${p.name}: ${p.quantity} unidades - $${p.revenue.toFixed(2)}`,
-          margin + 5,
-          yPosition
-        );
-        yPosition += 6;
+        pdf.text(row[0], margin, yPosition);
+        pdf.text(row[1], margin + columnWidth, yPosition);
+        pdf.text(row[2], margin + columnWidth * 2, yPosition);
+        pdf.text(row[3], margin + columnWidth * 3, yPosition);
+        pdf.text(row[4], margin + columnWidth * 4, yPosition);
+        yPosition += 5;
       });
     }
 
-    addSection('Top 20 Productos - Todos los Negocios');
-    const allTopProducts = getAllTopProducts(20);
-    allTopProducts.forEach((p: any, idx: number) => {
-      if (yPosition > 270) {
+    addSection('Top 20 Productos por Punto de Venta');
+    const columnWidth = (pageWidth - 2 * margin) / 3;
+
+    for (let pageIdx = 0; pageIdx < 2; pageIdx++) {
+      if (yPosition > 50) {
         pdf.addPage();
         yPosition = 10;
       }
-      pdf.setFontSize(10);
-      pdf.setFont('', 'normal');
-      pdf.text(
-        `${idx + 1}. ${p.name}: ${p.quantity} unidades - $${p.revenue.toFixed(2)}`,
-        margin + 5,
-        yPosition
-      );
-      yPosition += 6;
-    });
+
+      const posNumbers = pageIdx === 0 ? [1, 2] : [3];
+
+      for (let posNum of posNumbers) {
+        const posName = POS_NAMES[posNum] || `POS ${posNum}`;
+        const topPosProducts = getTopProductsPerPOS(posNum, 20);
+
+        if (topPosProducts.length === 0) continue;
+
+        if (yPosition > 250) {
+          pdf.addPage();
+          yPosition = 10;
+        }
+
+        pdf.setFontSize(11);
+        pdf.setFont('', 'bold');
+        pdf.setTextColor(230, 126, 34);
+        pdf.text(posName, margin, yPosition);
+        pdf.setTextColor(0, 0, 0);
+        yPosition += 6;
+
+        pdf.setFontSize(8);
+        pdf.setFont('', 'bold');
+        pdf.text('Producto', margin, yPosition);
+        pdf.text('Cant.', margin + columnWidth * 0.7, yPosition);
+        pdf.text('Ingresos', margin + columnWidth * 1.2, yPosition);
+        yPosition += 4;
+
+        pdf.setFont('', 'normal');
+        topPosProducts.forEach((p: any) => {
+          if (yPosition > 270) {
+            pdf.addPage();
+            yPosition = 10;
+          }
+          const productText = p.name.substring(0, 35);
+          pdf.text(productText, margin, yPosition);
+          pdf.text(p.quantity.toString(), margin + columnWidth * 0.7, yPosition);
+          pdf.text(`$${p.revenue.toFixed(0)}`, margin + columnWidth * 1.2, yPosition);
+          yPosition += 4;
+        });
+
+        yPosition += 3;
+      }
+    }
 
     pdf.save(`insights_${new Date().toISOString().split('T')[0]}.pdf`);
   },

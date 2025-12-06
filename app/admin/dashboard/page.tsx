@@ -59,7 +59,7 @@ export default function AdminDashboardPage() {
     if (!stats) return;
     setExporting(true);
     try {
-      await importExportService.exportInsightsToPDF(stats, allSales);
+      await importExportService.exportInsightsToPDF(stats, allSales, salesPerDay);
     } catch (error) {
       console.error('Error al exportar PDF:', error);
     }
