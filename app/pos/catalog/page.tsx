@@ -23,6 +23,7 @@ export default function CatalogPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [subcategories, setSubcategories] = useState<string[]>([]);
   const [todayTotal, setTodayTotal] = useState(0);
+  const [todayTotalCombined, setTodayTotalCombined] = useState(0);
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -47,7 +48,9 @@ export default function CatalogPage() {
     const fetchTodayTotal = async () => {
       if (user && user.role === 'pos' && user.pos_number) {
         const total = await salesService.getTodaySalesTotal(user.pos_number);
+        const combined = await salesService.getTodaySalesCombined();
         setTodayTotal(total);
+        setTodayTotalCombined(combined);
       }
     };
 
@@ -112,9 +115,15 @@ export default function CatalogPage() {
                   Mostrando {filteredProducts.length} de {products.length} productos
                 </p>
               </div>
-              <div className="bg-white rounded-lg shadow p-3 border-2 border-orange-200 text-right">
-                <p className="text-xs font-semibold text-gray-600 mb-1">VENDIDO HOY</p>
-                <p className="text-2xl font-bold text-orange-600">${todayTotal.toFixed(2)}</p>
+              <div className="flex gap-3">
+                <div className="bg-white rounded-lg shadow p-3 border-2 border-orange-200 text-right">
+                  <p className="text-xs font-semibold text-gray-600 mb-1">MI POS</p>
+                  <p className="text-2xl font-bold text-orange-600">${todayTotal.toFixed(2)}</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow p-3 border-2 border-blue-300 text-right">
+                  <p className="text-xs font-semibold text-blue-600 mb-1">TOTAL REDES</p>
+                  <p className="text-2xl font-bold text-blue-600">${todayTotalCombined.toFixed(2)}</p>
+                </div>
               </div>
             </div>
             

@@ -224,4 +224,143 @@ export const salesService = {
       return 0;
     }
   },
+
+  async getTodaySalesCombined(): Promise<number> {
+    try {
+      const now = new Date();
+      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+      
+      let startOfDay = new Date(argentinaTime);
+      startOfDay.setHours(3, 0, 0, 0);
+      
+      if (argentinaTime.getHours() < 3) {
+        startOfDay.setDate(startOfDay.getDate() - 1);
+      }
+      
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setDate(endOfDay.getDate() + 1);
+
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('*')
+        .gte('created_at', startOfDay.toISOString())
+        .lt('created_at', endOfDay.toISOString());
+
+      if (error || !sales) {
+        return 0;
+      }
+
+      return sales.reduce((sum, sale) => sum + sale.total, 0);
+    } catch {
+      return 0;
+    }
+  },
+
+  async getSalesPerDay(days = 30): Promise<Array<{ date: string; total: number; pos1: number; pos2: number; pos3: number }>> {
+    try {
+      const now = new Date();
+      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+      const startDate = new Date(argentinaTime);
+      startDate.setDate(startDate.getDate() - days);
+      startDate.setHours(3, 0, 0, 0);
+
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('*')
+        .gte('created_at', startDate.toISOString());
+
+      if (error || !sales) {
+        return [];
+      }
+
+      const salesByDay: Record<string, { total: number; pos1: number; pos2: number; pos3: number }> = {};
+
+      sales.forEach((sale) => {
+        const saleDate = new Date(sale.created_at);
+        const saleDateArg = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+        
+        let dayStart = new Date(saleDateArg);
+        dayStart.setHours(3, 0, 0, 0);
+        
+        if (saleDateArg.getHours() < 3) {
+          dayStart.setDate(dayStart.getDate() - 1);
+        }
+
+        const dateKey = dayStart.toISOString().split('T')[0];
+        
+        if (!salesByDay[dateKey]) {
+          salesByDay[dateKey] = { total: 0, pos1: 0, pos2: 0, pos3: 0 };
+        }
+
+        salesByDay[dateKey].total += sale.total;
+        if (sale.pos_number === 1) {
+          salesByDay[dateKey].pos1 += sale.total;
+        } else if (sale.pos_number === 2) {
+          salesByDay[dateKey].pos2 += sale.total;
+        } else if (sale.pos_number === 3) {
+          salesByDay[dateKey].pos3 += sale.total;
+        }
+      });
+
+      return Object.entries(salesByDay)
+        .map(([date, data]) => ({
+          date,
+          ...data,
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    } catch {
+      return [];
+    }
+  },
+
+  async getSalesByDayAndPos(posNumber: number, days = 30): Promise<Array<{ date: string; total: number }>> {
+    try {
+      const now = new Date();
+      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+      const startDate = new Date(argentinaTime);
+      startDate.setDate(startDate.getDate() - days);
+      startDate.setHours(3, 0, 0, 0);
+
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('*')
+        .eq('pos_number', posNumber)
+        .gte('created_at', startDate.toISOString());
+
+      if (error || !sales) {
+        return [];
+      }
+
+      const salesByDay: Record<string, number> = {};
+
+      sales.forEach((sale) => {
+        const saleDate = new Date(sale.created_at);
+        const saleDateArg = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+        
+        let dayStart = new Date(saleDateArg);
+        dayStart.setHours(3, 0, 0, 0);
+        
+        if (saleDateArg.getHours() < 3) {
+          dayStart.setDate(dayStart.getDate() - 1);
+        }
+
+        const dateKey = dayStart.toISOString().split('T')[0];
+        
+        if (!salesByDay[dateKey]) {
+          salesByDay[dateKey] = 0;
+        }
+
+        salesByDay[dateKey] += sale.total;
+      });
+
+      return Object.entries(salesByDay)
+        .map(([date, total]) => ({
+          date,
+          total,
+        }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    } catch {
+      return [];
+    }
+  },
 };

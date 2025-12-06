@@ -8,7 +8,7 @@ import { useAuthStore } from '@/lib/store';
 import { salesService } from '@/lib/services/sales';
 import { importExportService } from '@/lib/services/import-export';
 import { DashboardStats, POSDashboardStats, Sale } from '@/lib/types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -16,6 +16,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [posStats, setPosStats] = useState<POSDashboardStats[]>([]);
   const [allSales, setAllSales] = useState<Sale[]>([]);
+  const [salesPerDay, setSalesPerDay] = useState<Array<{ date: string; total: number; pos1: number; pos2: number; pos3: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -23,9 +24,11 @@ export default function AdminDashboardPage() {
   const fetchStats = async () => {
     const adminData = await salesService.getAdminDashboard();
     const sales = await salesService.getAllSales();
+    const perDay = await salesService.getSalesPerDay(200);
     
     setStats(adminData);
     setAllSales(sales);
+    setSalesPerDay(perDay);
 
     const posDataArray = [];
     for (let i = 1; i <= 3; i++) {
@@ -171,6 +174,56 @@ export default function AdminDashboardPage() {
                   </Link>
                 ))}
               </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6 lg:p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Ventas por Día (últimos 200 días)</h2>
+              {salesPerDay.length === 0 ? (
+                <p className="text-gray-600 text-center py-8">No hay datos disponibles</p>
+              ) : (
+                <div className="space-y-6">
+                  <ResponsiveContainer width="100%" height={350}>
+                    <LineChart data={salesPerDay} margin={{ bottom: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} />
+                      <YAxis />
+                      <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
+                      <Legend />
+                      <Line type="monotone" dataKey="total" stroke="#f97316" name="Total Redes" strokeWidth={2} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="pos1" stroke="#3b82f6" name="Costa del Este" strokeWidth={2} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="pos2" stroke="#10b981" name="Mar de las Pampas" strokeWidth={2} dot={{ r: 4 }} />
+                      <Line type="monotone" dataKey="pos3" stroke="#f43f5e" name="Costa Esmeralda" strokeWidth={2} dot={{ r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700">Fecha</th>
+                          <th className="px-4 py-3 text-right font-semibold text-gray-700">Total Redes</th>
+                          <th className="px-4 py-3 text-right font-semibold text-blue-700">Costa del Este</th>
+                          <th className="px-4 py-3 text-right font-semibold text-green-700">Mar de las Pampas</th>
+                          <th className="px-4 py-3 text-right font-semibold text-rose-700">Costa Esmeralda</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {salesPerDay.slice().reverse().map((day, idx) => (
+                          <tr key={idx} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
+                            <td className="px-4 py-3 font-medium text-gray-900">
+                              {new Date(day.date + 'T03:00:00').toLocaleDateString('es-AR', { weekday: 'short', month: 'short', day: 'numeric' })}
+                            </td>
+                            <td className="px-4 py-3 text-right font-bold text-orange-600">${day.total.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right text-blue-600">${day.pos1.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right text-green-600">${day.pos2.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right text-rose-600">${day.pos3.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-6 lg:p-8">

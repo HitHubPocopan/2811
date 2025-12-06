@@ -1,28 +1,11 @@
 'use client';
 
-import { useCartStore, useAuthStore } from '@/lib/store';
+import { useCartStore } from '@/lib/store';
 import { Product } from '@/lib/types';
-import { useMemo, useState, useEffect } from 'react';
-import { salesService } from '@/lib/services/sales';
+import { useMemo } from 'react';
 
 export function Cart({ products }: { products: Product[] }) {
   const { items, removeItem, updateQuantity, clearCart } = useCartStore();
-  const { user } = useAuthStore();
-  const [todayTotal, setTodayTotal] = useState(0);
-
-  useEffect(() => {
-    const fetchTodayTotal = async () => {
-      if (user && user.role === 'pos' && user.pos_number) {
-        const total = await salesService.getTodaySalesTotal(user.pos_number);
-        setTodayTotal(total);
-      }
-    };
-
-    fetchTodayTotal();
-
-    const interval = setInterval(fetchTodayTotal, 30000);
-    return () => clearInterval(interval);
-  }, [user]);
 
   // Create a product map for faster lookups
   const productMap = useMemo(() => 
@@ -64,15 +47,11 @@ export function Cart({ products }: { products: Product[] }) {
 
   return (
     <div className="bg-white rounded-lg shadow flex flex-col h-full">
-      {/* Header fijo con total del día */}
-      <div className="flex-shrink-0 p-4 border-b-2 border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50">
-        <div className="mb-3 pb-3 border-b border-orange-100">
-          <p className="text-xs font-semibold text-gray-600 mb-1">VENDIDO HOY</p>
-          <p className="text-2xl font-bold text-orange-600">${todayTotal.toFixed(2)}</p>
-        </div>
+      {/* Header fijo */}
+      <div className="flex-shrink-0 p-6 border-b border-gray-200 bg-white">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-bold">Carrito</h2>
-          <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+          <h2 className="text-2xl font-bold">Carrito</h2>
+          <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-sm font-medium">
             {items.length} {items.length === 1 ? 'producto' : 'productos'}
           </span>
         </div>
