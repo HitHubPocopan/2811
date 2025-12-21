@@ -298,12 +298,28 @@ export default function StatsPage() {
       let totalRevenue = 0;
 
       sales.forEach((sale: Sale) => {
-        const method = sale.payment_method || 'Sin especificar';
-        if (!paymentCounts[method]) {
-          paymentCounts[method] = { count: 0, revenue: 0 };
+        if (sale.payment_method === 'Mixto' && sale.payment_breakdown) {
+          const breakdown = sale.payment_breakdown;
+          if (breakdown.method1) {
+            if (!paymentCounts[breakdown.method1]) {
+              paymentCounts[breakdown.method1] = { count: 0, revenue: 0 };
+            }
+            paymentCounts[breakdown.method1].revenue += breakdown.amount1;
+          }
+          if (breakdown.method2) {
+            if (!paymentCounts[breakdown.method2]) {
+              paymentCounts[breakdown.method2] = { count: 0, revenue: 0 };
+            }
+            paymentCounts[breakdown.method2].revenue += breakdown.amount2;
+          }
+        } else {
+          const method = sale.payment_method || 'Sin especificar';
+          if (!paymentCounts[method]) {
+            paymentCounts[method] = { count: 0, revenue: 0 };
+          }
+          paymentCounts[method].count += 1;
+          paymentCounts[method].revenue += sale.total;
         }
-        paymentCounts[method].count += 1;
-        paymentCounts[method].revenue += sale.total;
         totalRevenue += sale.total;
       });
 
