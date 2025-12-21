@@ -6,7 +6,7 @@ import { Navbar } from '@/components/Navbar';
 import { useAuthStore, useCartStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
 import { salesService } from '@/lib/services/sales';
-import { Product, SaleItem } from '@/lib/types';
+import { Product, SaleItem, PaymentMethod, PaymentBreakdown } from '@/lib/types';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -15,6 +15,12 @@ export default function CheckoutPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [mixedPayment, setMixedPayment] = useState(false);
+  const [mixedMethod1, setMixedMethod1] = useState<PaymentMethod>('Efectivo');
+  const [mixedAmount1, setMixedAmount1] = useState<number>(0);
+  const [mixedMethod2, setMixedMethod2] = useState<PaymentMethod>('Transferencia');
+  const [mixedAmount2, setMixedAmount2] = useState<number>(0);
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -37,6 +43,18 @@ export default function CheckoutPage() {
 
   const handleCompleteSale = async () => {
     if (!user || user.role !== 'pos') return;
+    if (!paymentMethod) {
+      setError('Por favor selecciona un método de pago.');
+      return;
+    }
+
+    if (paymentMethod === 'Mixto') {
+      const total = getTotal();
+      if (mixedAmount1 + mixedAmount2 !== total) {
+        setError(`Los montos deben sumar ${total.toFixed(2)}. Actualmente: ${(mixedAmount1 + mixedAmount2).toFixed(2)}`);
+        return;
+      }
+    }
 
     setProcessing(true);
     setError('');
@@ -54,7 +72,24 @@ export default function CheckoutPage() {
 
     const total = getTotal();
 
-    const sale = await salesService.createSale(user.id, user.pos_number || 0, saleItems, total);
+    let paymentBreakdown: PaymentBreakdown | undefined;
+    if (paymentMethod === 'Mixto') {
+      paymentBreakdown = {
+        method1: mixedMethod1,
+        amount1: mixedAmount1,
+        method2: mixedMethod2,
+        amount2: mixedAmount2,
+      };
+    }
+
+    const sale = await salesService.createSale(
+      user.id,
+      user.pos_number || 0,
+      saleItems,
+      total,
+      paymentMethod,
+      paymentBreakdown
+    );
 
     if (sale) {
       clearCart();
@@ -105,6 +140,93 @@ export default function CheckoutPage() {
             </div>
           </div>
         </div>
+
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="text-xl font-bold mb-4">Método de pago</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {(['Efectivo', 'Transferencia', 'QR', 'Débito', 'Crédito', 'Mixto'] as PaymentMethod[]).map((method) => (
+              <button
+                key={method}
+                onClick={() => {
+                  setPaymentMethod(method);
+                  setMixedPayment(method === 'Mixto');
+                }}
+                className={`py-3 px-4 rounded-lg font-semibold transition ${
+                  paymentMethod === method
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {method}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {mixedPayment && (
+          <div className="bg-blue-50 p-6 rounded-lg shadow mb-6 border border-blue-200">
+            <h3 className="text-lg font-bold mb-4 text-blue-900">Detalles de pago mixto</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Método 1</label>
+                  <select
+                    value={mixedMethod1}
+                    onChange={(e) => setMixedMethod1(e.target.value as PaymentMethod)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {(['Efectivo', 'Transferencia', 'QR', 'Débito', 'Crédito'] as PaymentMethod[]).map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Monto 1</label>
+                  <input
+                    type="number"
+                    value={mixedAmount1}
+                    onChange={(e) => setMixedAmount1(parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Método 2</label>
+                  <select
+                    value={mixedMethod2}
+                    onChange={(e) => setMixedMethod2(e.target.value as PaymentMethod)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {(['Efectivo', 'Transferencia', 'QR', 'Débito', 'Crédito'] as PaymentMethod[]).map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Monto 2</label>
+                  <input
+                    type="number"
+                    value={mixedAmount2}
+                    onChange={(e) => setMixedAmount2(parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-3 p-3 bg-white rounded border border-blue-300">
+                <p className="text-sm font-semibold text-gray-700">
+                  Total: <span className="text-blue-600">${(mixedAmount1 + mixedAmount2).toFixed(2)}</span> / Requerido: <span className="text-orange-600">${total.toFixed(2)}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6">

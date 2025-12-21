@@ -7,7 +7,8 @@ import { Cart } from '@/components/Cart';
 import { useAuthStore, useCartStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
 import { salesService } from '@/lib/services/sales';
-import { Product } from '@/lib/types';
+import { supabase } from '@/lib/supabase';
+import { Product, Sale } from '@/lib/types';
 
 
 
@@ -24,6 +25,28 @@ export default function CatalogPage() {
   const [subcategories, setSubcategories] = useState<string[]>([]);
   const [todayTotal, setTodayTotal] = useState(0);
   const [todayTotalCombined, setTodayTotalCombined] = useState(0);
+  const [productSalesCount, setProductSalesCount] = useState<Record<string, number>>({});
+
+  const getSalesCountByProduct = async () => {
+    try {
+      const { data: sales, error } = await supabase.from('sales').select('*');
+      if (error || !sales) return;
+
+      const counts: Record<string, number> = {};
+      sales.forEach((sale: Sale) => {
+        sale.items.forEach((item: any) => {
+          if (!counts[item.product_id]) {
+            counts[item.product_id] = 0;
+          }
+          counts[item.product_id] += item.quantity;
+        });
+      });
+
+      setProductSalesCount(counts);
+    } catch (error) {
+      console.error('Error getting sales count:', error);
+    }
+  };
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -38,6 +61,7 @@ export default function CatalogPage() {
       ]);
       setProducts(productsData);
       setCategories(categoriesData);
+      getSalesCountByProduct();
       setLoading(false);
     };
 
@@ -193,51 +217,63 @@ export default function CatalogPage() {
             <>
               <div className="flex-1 overflow-y-auto p-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 pb-4">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="bg-white rounded-lg shadow hover:shadow-md transition-all p-2 border border-gray-100 flex flex-col"
-                    >
-                      {product.image_url && (
-                        <img
-                          src={product.image_url}
-                          alt={product.name}
-                          className="w-full h-24 object-cover rounded mb-2"
-                        />
-                      )}
-                      <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
-                      
-                      {(product.category || product.subcategory) && (
-                        <div className="mb-1 flex-grow">
-                          <div className="flex gap-1 flex-wrap">
-                            {product.category && (
-                              <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
-                                {product.category}
-                              </span>
-                            )}
-                            {product.subcategory && (
-                              <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
-                                {product.subcategory}
-                              </span>
-                            )}
+                  {filteredProducts.map((product) => {
+                    const count = productSalesCount[product.id] || 0;
+                    let badgeColor = 'bg-blue-500';
+                    if (count > 0 && count <= 5) badgeColor = 'bg-yellow-500';
+                    if (count > 5) badgeColor = 'bg-red-500';
+
+                    return (
+                      <div
+                        key={product.id}
+                        className="bg-white rounded-lg shadow hover:shadow-md transition-all p-2 border border-gray-100 flex flex-col relative"
+                      >
+                        <div className="absolute -top-2 -right-2 z-10">
+                          <div className={`${badgeColor} text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold shadow-md border-2 border-white`}>
+                            {count}
                           </div>
                         </div>
-                      )}
-                      
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-lg font-bold text-orange-600">
-                          ${product.price.toFixed(2)}
-                        </span>
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-24 object-cover rounded mb-2"
+                          />
+                        )}
+                        <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
+                        
+                        {(product.category || product.subcategory) && (
+                          <div className="mb-1 flex-grow">
+                            <div className="flex gap-1 flex-wrap">
+                              {product.category && (
+                                <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
+                                  {product.category}
+                                </span>
+                              )}
+                              {product.subcategory && (
+                                <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
+                                  {product.subcategory}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-lg font-bold text-orange-600">
+                            ${product.price.toFixed(2)}
+                          </span>
+                        </div>
+                        
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded text-xs font-semibold transition"
+                        >
+                          Agregar
+                        </button>
                       </div>
-                      
-                      <button
-                        onClick={() => handleAddToCart(product)}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded text-xs font-semibold transition"
-                      >
-                        Agregar
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </>

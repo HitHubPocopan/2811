@@ -1,5 +1,14 @@
 export type UserRole = 'admin' | 'pos';
 
+export type PaymentMethod = 'Efectivo' | 'Transferencia' | 'QR' | 'Débito' | 'Crédito' | 'Mixto';
+
+export interface PaymentBreakdown {
+  method1: PaymentMethod;
+  amount1: number;
+  method2: PaymentMethod;
+  amount2: number;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -36,6 +45,8 @@ export interface Sale {
   pos_number: number;
   total: number;
   items: SaleItem[];
+  payment_method?: PaymentMethod;
+  payment_breakdown?: PaymentBreakdown;
   created_at: string;
 }
 

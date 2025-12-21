@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Sale, SaleItem, DashboardStats, POSDashboardStats } from '@/lib/types';
+import { Sale, SaleItem, DashboardStats, POSDashboardStats, PaymentMethod, PaymentBreakdown } from '@/lib/types';
 
 const POS_NAMES: Record<number, string> = {
   1: 'Costa del Este',
@@ -8,7 +8,14 @@ const POS_NAMES: Record<number, string> = {
 };
 
 export const salesService = {
-  async createSale(posId: string, posNumber: number, items: SaleItem[], total: number): Promise<Sale | null> {
+  async createSale(
+    posId: string,
+    posNumber: number,
+    items: SaleItem[],
+    total: number,
+    paymentMethod?: PaymentMethod,
+    paymentBreakdown?: PaymentBreakdown
+  ): Promise<Sale | null> {
     try {
       const { data, error } = await supabase
         .from('sales')
@@ -18,6 +25,8 @@ export const salesService = {
             pos_number: posNumber,
             total,
             items,
+            payment_method: paymentMethod,
+            payment_breakdown: paymentBreakdown,
           },
         ])
         .select()

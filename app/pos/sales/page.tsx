@@ -132,6 +132,7 @@ export default function SalesHistoryPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Fecha</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Cantidad items</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Método de pago</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Total</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Detalles</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold">Acciones</th>
@@ -155,6 +156,22 @@ export default function SalesHistoryPage() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {sale.items.reduce((sum, item) => sum + item.quantity, 0)} items
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {sale.payment_method ? (
+                        <div className="space-y-1">
+                          {sale.payment_method === 'Mixto' && sale.payment_breakdown ? (
+                            <div className="text-xs font-semibold text-gray-700">
+                              <div>{sale.payment_breakdown.method1} ${sale.payment_breakdown.amount1.toFixed(2)}</div>
+                              <div>+ {sale.payment_breakdown.method2} ${sale.payment_breakdown.amount2.toFixed(2)}</div>
+                            </div>
+                          ) : (
+                            <span className="font-semibold text-gray-900">{sale.payment_method}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">Sin datos</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm font-bold text-green-600">
                       ${sale.total.toFixed(2)}
