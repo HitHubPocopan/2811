@@ -109,7 +109,7 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="max-w-2xl mx-auto p-6">
+      <div className="max-w-2xl mx-auto p-3 sm:p-6">
         <h1 className="text-3xl font-bold mb-6">Confirmación de venta</h1>
 
         <div className="bg-white p-6 rounded-lg shadow mb-6">

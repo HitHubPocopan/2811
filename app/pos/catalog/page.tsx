@@ -129,9 +129,9 @@ export default function CatalogPage() {
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col overflow-hidden" style={{ WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility' }}>
       <Navbar />
-      <div className="flex-1 flex overflow-hidden gap-6 p-6 lg:p-8">
-        <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl shadow-lg">
-          <div className="flex-shrink-0 p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-slate-50">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden gap-4 lg:gap-6 p-3 sm:p-4 lg:p-8">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-lg sm:rounded-xl shadow-lg">
+          <div className="flex-shrink-0 p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-slate-50">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-1">Catálogo de Productos</h1>
@@ -216,7 +216,7 @@ export default function CatalogPage() {
           ) : (
             <>
               <div className="flex-1 overflow-y-auto p-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 pb-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 pb-4">
                   {filteredProducts.map((product) => {
                     const count = productSalesCount[product.id] || 0;
                     let badgeColor = 'bg-blue-500';

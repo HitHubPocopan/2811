@@ -7,7 +7,7 @@ import { useAuthStore } from '@/lib/store';
 import { salesService } from '@/lib/services/sales';
 import { POSDashboardStats, Sale } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface HourlyData {
   hour: string;
@@ -23,18 +23,6 @@ interface DayWeatherDetail {
   evening: string;
   summary: string;
   hasVariation: boolean;
-}
-
-interface SalesByWeatherAndHour {
-  name: string;
-  amount: number;
-}
-
-interface PaymentMethodData {
-  name: string;
-  value: number;
-  percentage: number;
-  [key: string]: string | number;
 }
 
 const LOCATION_COORDINATES: Record<number, { lat: number; lon: number }> = {
@@ -187,8 +175,6 @@ export default function StatsPage() {
   const [salesPerDay, setSalesPerDay] = useState<Array<{ date: string; total: number }>>([]);
   const [salesPerHour, setSalesPerHour] = useState<HourlyData[]>([]);
   const [weatherByDate, setWeatherByDate] = useState<Record<string, DayWeatherDetail>>({});
-  const [salesByWeather, setSalesByWeather] = useState<SalesByWeatherAndHour[]>([]);
-  const [paymentMethodData, setPaymentMethodData] = useState<PaymentMethodData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const getSalesPerHour = async (posNumber: number, days = 30) => {
@@ -276,130 +262,6 @@ export default function StatsPage() {
     }
   };
 
-  const getPaymentMethodStats = async (posNumber: number, days = 200): Promise<PaymentMethodData[]> => {
-    try {
-      const now = new Date();
-      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-      const startDate = new Date(argentinaTime);
-      startDate.setDate(startDate.getDate() - days);
-      startDate.setHours(3, 0, 0, 0);
-
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('*')
-        .eq('pos_number', posNumber)
-        .gte('created_at', startDate.toISOString());
-
-      if (error || !sales) {
-        return [];
-      }
-
-      const paymentCounts: Record<string, { count: number; revenue: number }> = {};
-      let totalRevenue = 0;
-
-      sales.forEach((sale: Sale) => {
-        if (sale.payment_method === 'Mixto' && sale.payment_breakdown) {
-          const breakdown = sale.payment_breakdown;
-          if (breakdown.method1) {
-            if (!paymentCounts[breakdown.method1]) {
-              paymentCounts[breakdown.method1] = { count: 0, revenue: 0 };
-            }
-            paymentCounts[breakdown.method1].revenue += breakdown.amount1;
-          }
-          if (breakdown.method2) {
-            if (!paymentCounts[breakdown.method2]) {
-              paymentCounts[breakdown.method2] = { count: 0, revenue: 0 };
-            }
-            paymentCounts[breakdown.method2].revenue += breakdown.amount2;
-          }
-        } else {
-          const method = sale.payment_method || 'Sin especificar';
-          if (!paymentCounts[method]) {
-            paymentCounts[method] = { count: 0, revenue: 0 };
-          }
-          paymentCounts[method].count += 1;
-          paymentCounts[method].revenue += sale.total;
-        }
-        totalRevenue += sale.total;
-      });
-
-      return Object.entries(paymentCounts)
-        .map(([name, data]) => ({
-          name,
-          value: data.count,
-          percentage: totalRevenue > 0 ? (data.revenue / totalRevenue) * 100 : 0,
-        }))
-        .sort((a, b) => b.value - a.value);
-    } catch {
-      return [];
-    }
-  };
-
-  const getSalesByWeatherAndHour = async (posNumber: number, days = 200, weatherByDate: Record<string, DayWeatherDetail>) => {
-    try {
-      const now = new Date();
-      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-      const startDate = new Date(argentinaTime);
-      startDate.setDate(startDate.getDate() - days);
-      startDate.setHours(3, 0, 0, 0);
-
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('*')
-        .eq('pos_number', posNumber)
-        .gte('created_at', startDate.toISOString());
-
-      if (error || !sales) {
-        return [];
-      }
-
-      const salesMap: Record<string, number> = {};
-
-      sales.forEach((sale: Sale) => {
-        const saleDate = new Date(sale.created_at);
-        const saleDateArg = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-        const hour = saleDateArg.getHours();
-        const dateStr = saleDateArg.toISOString().split('T')[0];
-        
-        if (hour >= 2 && hour < 9) {
-          return;
-        }
-
-        const weather = weatherByDate[dateStr];
-        if (!weather) return;
-        
-        let specificWeather = 'Sin datos';
-        let timeSlotLabel = '';
-
-        if (hour >= 9 && hour < 12) {
-          specificWeather = weather.morning;
-          timeSlotLabel = 'Mañana';
-        } else if (hour >= 12 && hour < 16) {
-          specificWeather = weather.afternoon;
-          timeSlotLabel = 'Mediodía';
-        } else if (hour >= 16 && hour < 20) {
-          specificWeather = weather.afternoon;
-          timeSlotLabel = 'Tarde';
-        } else {
-          specificWeather = weather.evening;
-          timeSlotLabel = 'Noche';
-        }
-
-        const key = `${timeSlotLabel} - ${specificWeather}`;
-        salesMap[key] = (salesMap[key] || 0) + sale.total;
-      });
-
-      return Object.entries(salesMap)
-        .sort((a, b) => b[1] - a[1])
-        .map(([name, amount]) => ({
-          name,
-          amount,
-        }));
-    } catch {
-      return [];
-    }
-  };
-
   useEffect(() => {
     if (!user || user.role !== 'pos') {
       router.push('/');
@@ -411,15 +273,11 @@ export default function StatsPage() {
       const perDay = await salesService.getSalesByDayAndPos(user.pos_number || 0, 200);
       const perHour = await getSalesPerHour(user.pos_number || 0, 30);
       const weather = await getWeatherByPos(user.pos_number || 0, 200);
-      const weatherSales = await getSalesByWeatherAndHour(user.pos_number || 0, 200, weather);
-      const paymentStats = await getPaymentMethodStats(user.pos_number || 0, 200);
       
       setStats(data);
       setSalesPerDay(perDay);
       setSalesPerHour(perHour);
       setWeatherByDate(weather);
-      setSalesByWeather(weatherSales);
-      setPaymentMethodData(paymentStats);
       setLoading(false);
     };
 
@@ -433,7 +291,7 @@ export default function StatsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-3 sm:p-6">
         <h1 className="text-3xl font-bold mb-6">Estadísticas - {user.name || `POS ${user.pos_number}`}</h1>
 
         {loading ? (
@@ -453,97 +311,6 @@ export default function StatsPage() {
                 <p className="text-gray-600 text-sm font-semibold mb-2">Items vendidos</p>
                 <p className="text-4xl font-bold text-purple-600">{stats.total_items_sold}</p>
               </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold mb-4">Ventas por Clima y Horario</h2>
-              {salesByWeather.length === 0 ? (
-                <p className="text-gray-600">No hay datos disponibles</p>
-              ) : (
-                <div className="space-y-6">
-                  <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={salesByWeather} margin={{ bottom: 80, left: 0, right: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
-                      <YAxis label={{ value: 'Monto Vendido ($)', angle: -90, position: 'insideLeft' }} />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                        formatter={(value: number) => `$${value.toFixed(2)}`}
-                      />
-                      <Bar dataKey="amount" fill="#F97316" />
-                    </BarChart>
-                  </ResponsiveContainer>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="px-4 py-3 text-left font-semibold text-gray-700">Momento + Clima</th>
-                          <th className="px-4 py-3 text-right font-semibold text-gray-700">Monto Vendido</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {salesByWeather.map((item, idx) => (
-                          <tr key={idx} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
-                            <td className="px-4 py-3 font-medium text-gray-900">{item.name}</td>
-                            <td className="px-4 py-3 text-right font-bold text-orange-600">${item.amount.toFixed(2)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold mb-4">Distribución por método de pago (últimos 200 días)</h2>
-              {paymentMethodData.length === 0 ? (
-                <p className="text-gray-600">No hay datos disponibles</p>
-              ) : (
-                <div className="space-y-6">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={paymentMethodData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name }) => `${name}`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {paymentMethodData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={['#f97316', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][index % 6]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => `${value} transacciones`} />
-                    </PieChart>
-                  </ResponsiveContainer>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="px-4 py-3 text-left font-semibold text-gray-700">Método de pago</th>
-                          <th className="px-4 py-3 text-right font-semibold text-gray-700">Transacciones</th>
-                          <th className="px-4 py-3 text-right font-semibold text-gray-700">% de Ingresos</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paymentMethodData.map((item, idx) => (
-                          <tr key={idx} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
-                            <td className="px-4 py-3 font-medium text-gray-900">{item.name}</td>
-                            <td className="px-4 py-3 text-right text-gray-600">{item.value}</td>
-                            <td className="px-4 py-3 text-right font-semibold text-orange-600">{item.percentage.toFixed(1)}%</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
