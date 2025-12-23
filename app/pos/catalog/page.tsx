@@ -129,7 +129,7 @@ export default function CatalogPage() {
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col overflow-hidden" style={{ WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility' }}>
       <Navbar />
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden gap-4 lg:gap-6 p-3 sm:p-4 lg:p-8">
+      <div className="flex-1 flex flex-col xl:flex-row overflow-hidden gap-4 xl:gap-6 p-3 sm:p-4 xl:p-8">
         <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-lg sm:rounded-xl shadow-lg">
           <div className="flex-shrink-0 p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-slate-50">
             <div className="flex justify-between items-start mb-4">
@@ -139,14 +139,14 @@ export default function CatalogPage() {
                   Mostrando {filteredProducts.length} de {products.length} productos
                 </p>
               </div>
-              <div className="flex gap-3">
-                <div className="bg-white rounded-lg shadow p-3 border-2 border-orange-200 text-right">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
+                <div className="bg-white rounded-lg shadow p-2 sm:p-3 border-2 border-orange-200 text-right flex-1">
                   <p className="text-xs font-semibold text-gray-600 mb-1">MI POS</p>
-                  <p className="text-2xl font-bold text-orange-600">${todayTotal.toFixed(2)}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-orange-600">${todayTotal.toFixed(2)}</p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow p-3 border-2 border-blue-300 text-right">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow p-2 sm:p-3 border-2 border-blue-300 text-right flex-1">
                   <p className="text-xs font-semibold text-blue-600 mb-1">TOTAL REDES</p>
-                  <p className="text-2xl font-bold text-blue-600">${todayTotalCombined.toFixed(2)}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-600">${todayTotalCombined.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -156,19 +156,19 @@ export default function CatalogPage() {
               placeholder="Buscar productos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm mb-4 text-black"
+              className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm mb-4 text-black text-base"
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Categoría</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => {
                     setSelectedCategory(e.target.value);
                     setSelectedSubcategory('');
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm text-black"
+                  className="w-full px-3 py-2 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-xs sm:text-sm text-black"
                 >
                   <option value="">Todas ({categories.length})</option>
                   {categories.map((cat) => (
@@ -180,12 +180,12 @@ export default function CatalogPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Sub-Categoría</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Sub-Categoría</label>
                 <select
                   value={selectedSubcategory}
                   onChange={(e) => setSelectedSubcategory(e.target.value)}
                   disabled={!selectedCategory}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                  className="w-full px-3 py-2 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
                 >
                   <option value="">Todas ({subcategories.length})</option>
                   {subcategories.map((subcat) => (
@@ -215,8 +215,8 @@ export default function CatalogPage() {
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto p-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 pb-4">
+              <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 pb-4">
                   {filteredProducts.map((product) => {
                     const count = productSalesCount[product.id] || 0;
                     let badgeColor = 'bg-blue-500';
@@ -280,7 +280,7 @@ export default function CatalogPage() {
           )}
         </div>
 
-        <div className="w-96 flex flex-col gap-4 overflow-hidden">
+        <div className="w-full xl:w-96 flex flex-col gap-4 overflow-hidden">
           <div className="flex-1 min-h-0">
             <Cart products={products} />
           </div>

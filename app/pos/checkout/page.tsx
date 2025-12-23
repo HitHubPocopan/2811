@@ -110,22 +110,22 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-2xl mx-auto p-3 sm:p-6">
-        <h1 className="text-3xl font-bold mb-6">Confirmación de venta</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Confirmación de venta</h1>
 
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="text-xl font-bold mb-4">Resumen de venta</h2>
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-4">Resumen de venta</h2>
           <div className="space-y-3">
             {items.map((item) => {
               const product = products.find((p) => p.id === item.product_id);
               return (
                 <div key={item.product_id} className="flex justify-between pb-3 border-b">
                   <div>
-                    <p className="font-semibold">{product?.name}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-semibold text-sm sm:text-base">{product?.name}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">
                       ${item.price.toFixed(2)} x {item.quantity}
                     </p>
                   </div>
-                  <p className="font-semibold">
+                  <p className="font-semibold text-sm sm:text-base">
                     ${(item.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
@@ -134,16 +134,16 @@ export default function CheckoutPage() {
           </div>
 
           <div className="mt-6 pt-4 border-t-2">
-            <div className="flex justify-between text-2xl font-bold">
+            <div className="flex justify-between text-xl sm:text-2xl font-bold">
               <span>Total:</span>
               <span className="text-green-600">${total.toFixed(2)}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="text-xl font-bold mb-4">Método de pago</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-4">Método de pago</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
             {(['Efectivo', 'Transferencia', 'QR', 'Débito', 'Crédito', 'Mixto'] as PaymentMethod[]).map((method) => (
               <button
                 key={method}
@@ -151,7 +151,7 @@ export default function CheckoutPage() {
                   setPaymentMethod(method);
                   setMixedPayment(method === 'Mixto');
                 }}
-                className={`py-3 px-4 rounded-lg font-semibold transition ${
+                className={`py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-semibold transition text-xs sm:text-sm ${
                   paymentMethod === method
                     ? 'bg-orange-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -164,8 +164,8 @@ export default function CheckoutPage() {
         </div>
 
         {mixedPayment && (
-          <div className="bg-blue-50 p-6 rounded-lg shadow mb-6 border border-blue-200">
-            <h3 className="text-lg font-bold mb-4 text-blue-900">Detalles de pago mixto</h3>
+          <div className="bg-blue-50 p-4 sm:p-6 rounded-lg shadow mb-6 border border-blue-200">
+            <h3 className="text-base sm:text-lg font-bold mb-4 text-blue-900">Detalles de pago mixto</h3>
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -229,22 +229,22 @@ export default function CheckoutPage() {
         )}
 
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6">
+          <div className="p-3 sm:p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg mb-6 text-xs sm:text-sm">
             {error}
           </div>
         )}
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <button
             onClick={() => router.back()}
-            className="flex-1 bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition"
+            className="flex-1 bg-gray-400 text-white py-3 rounded-lg hover:bg-gray-500 transition font-semibold text-sm sm:text-base"
           >
             Volver
           </button>
           <button
             onClick={handleCompleteSale}
             disabled={processing}
-            className="flex-1 bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-orange-600 text-white py-3 rounded-lg font-bold hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             {processing ? 'Procesando...' : 'Confirmar venta'}
           </button>

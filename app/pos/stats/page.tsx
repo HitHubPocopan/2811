@@ -292,29 +292,29 @@ export default function StatsPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-6xl mx-auto p-3 sm:p-6">
-        <h1 className="text-3xl font-bold mb-6">Estadísticas - {user.name || `POS ${user.pos_number}`}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Estadísticas - {user.name || `POS ${user.pos_number}`}</h1>
 
         {loading ? (
           <div className="text-center py-12">Cargando estadísticas...</div>
         ) : stats ? (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <p className="text-gray-600 text-sm font-semibold mb-2">Total de ventas</p>
-                <p className="text-4xl font-bold text-orange-600">{stats.total_sales}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+                <p className="text-gray-600 text-xs sm:text-sm font-semibold mb-2">Total de ventas</p>
+                <p className="text-2xl sm:text-4xl font-bold text-orange-600">{stats.total_sales}</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow">
-                <p className="text-gray-600 text-sm font-semibold mb-2">Ingresos totales</p>
-                <p className="text-4xl font-bold text-green-600">${stats.total_revenue.toFixed(2)}</p>
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+                <p className="text-gray-600 text-xs sm:text-sm font-semibold mb-2">Ingresos totales</p>
+                <p className="text-2xl sm:text-4xl font-bold text-green-600">${stats.total_revenue.toFixed(2)}</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow">
-                <p className="text-gray-600 text-sm font-semibold mb-2">Items vendidos</p>
-                <p className="text-4xl font-bold text-purple-600">{stats.total_items_sold}</p>
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow sm:col-span-2 lg:col-span-1">
+                <p className="text-gray-600 text-xs sm:text-sm font-semibold mb-2">Items vendidos</p>
+                <p className="text-2xl sm:text-4xl font-bold text-purple-600">{stats.total_items_sold}</p>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold mb-4">Ventas por Hora (últimos 30 días)</h2>
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+              <h2 className="text-lg sm:text-xl font-bold mb-4">Ventas por Hora (últimos 30 días)</h2>
               {salesPerHour.length === 0 ? (
                 <p className="text-gray-600">No hay datos disponibles</p>
               ) : (
@@ -367,8 +367,8 @@ export default function StatsPage() {
               )}
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold mb-4">Productos más vendidos</h2>
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+              <h2 className="text-lg sm:text-xl font-bold mb-4">Productos más vendidos</h2>
               {stats.top_products.length === 0 ? (
                 <p className="text-gray-600">No hay datos disponibles</p>
               ) : (
@@ -386,8 +386,8 @@ export default function StatsPage() {
               )}
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold mb-4">Ventas por Día (últimos 200 días)</h2>
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+              <h2 className="text-lg sm:text-xl font-bold mb-4">Ventas por Día (últimos 200 días)</h2>
               {salesPerDay.length === 0 ? (
                 <p className="text-gray-600">No hay datos disponibles</p>
               ) : (
@@ -445,8 +445,8 @@ export default function StatsPage() {
               )}
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-bold mb-4">Últimas ventas</h2>
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+              <h2 className="text-lg sm:text-xl font-bold mb-4">Últimas ventas</h2>
               {stats.last_sales.length === 0 ? (
                 <p className="text-gray-600">No hay ventas registradas</p>
               ) : (
@@ -454,18 +454,18 @@ export default function StatsPage() {
                   {stats.last_sales.map((sale) => (
                     <div
                       key={sale.id}
-                      className="flex justify-between items-center p-3 bg-gray-50 rounded"
+                      className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 bg-gray-50 rounded gap-2 sm:gap-4"
                     >
                       <div>
-                        <p className="font-semibold">
+                        <p className="font-semibold text-xs sm:text-sm">
                           {new Date(sale.created_at).toLocaleDateString('es-AR')} -{' '}
                           {new Date(sale.created_at).toLocaleTimeString('es-AR')}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs text-gray-600">
                           {sale.items.reduce((sum, item) => sum + item.quantity, 0)} items
                         </p>
                       </div>
-                      <p className="font-bold text-green-600">${sale.total.toFixed(2)}</p>
+                      <p className="font-bold text-green-600 text-sm">${sale.total.toFixed(2)}</p>
                     </div>
                   ))}
                 </div>

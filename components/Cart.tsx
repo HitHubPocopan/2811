@@ -37,10 +37,10 @@ export function Cart({ products }: { products: Product[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow flex flex-col h-full items-center justify-center text-center text-gray-600 p-6">
+      <div className="bg-white rounded-lg shadow flex flex-col h-full items-center justify-center text-center text-gray-600 p-4 sm:p-6">
         <p className="text-3xl mb-3">🛒</p>
-        <p className="font-semibold text-lg mb-1">El carrito está vacío</p>
-        <p className="text-sm text-gray-500">Agrega algunos productos para comenzar</p>
+        <p className="font-semibold text-base sm:text-lg mb-1">El carrito está vacío</p>
+        <p className="text-xs sm:text-sm text-gray-500">Agrega algunos productos para comenzar</p>
       </div>
     );
   }
@@ -48,33 +48,33 @@ export function Cart({ products }: { products: Product[] }) {
   return (
     <div className="bg-white rounded-lg shadow flex flex-col h-full">
       {/* Header fijo */}
-      <div className="flex-shrink-0 p-6 border-b border-gray-200 bg-white">
+      <div className="flex-shrink-0 p-4 sm:p-6 border-b border-gray-200 bg-white">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Carrito</h2>
-          <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-sm font-medium">
+          <h2 className="text-lg sm:text-2xl font-bold">Carrito</h2>
+          <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs sm:text-sm font-medium">
             {items.length} {items.length === 1 ? 'producto' : 'productos'}
           </span>
         </div>
       </div>
       
       {/* Área scrolleable de productos */}
-      <div className="flex-1 overflow-hidden"> {/* Contenedor para el scroll */}
-        <div className="h-full overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
           {items.map((item) => (
             <div
               key={item.product_id}
-              className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-100"
+              className="flex justify-between items-center p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-100 gap-2"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate">{getProductName(item.product_id)}</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="font-semibold text-xs sm:text-sm truncate">{getProductName(item.product_id)}</p>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
                   ${item.price.toFixed(2)} × {item.quantity} = 
                   <span className="font-semibold ml-1">
                     ${(item.price * item.quantity).toFixed(2)}
                   </span>
                 </p>
               </div>
-              <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 <input
                   type="number"
                   min="1"
@@ -86,7 +86,7 @@ export function Cart({ products }: { products: Product[] }) {
                       handleQuantityChange(item.product_id, 1);
                     }
                   }}
-                  className="w-16 p-2 border border-gray-300 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-12 sm:w-16 p-2 border border-gray-300 rounded text-center text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
                 <button
                   onClick={() => removeItem(item.product_id)}
@@ -103,15 +103,15 @@ export function Cart({ products }: { products: Product[] }) {
       </div>
 
       {/* Footer fijo con total y botones */}
-      <div className="flex-shrink-0 border-t border-gray-200 p-6 bg-gradient-to-r from-orange-50 to-slate-50">
-        <div className="flex justify-between text-lg font-bold mb-4">
+      <div className="flex-shrink-0 border-t border-gray-200 p-4 sm:p-6 bg-gradient-to-r from-orange-50 to-slate-50">
+        <div className="flex justify-between text-base sm:text-lg font-bold mb-4">
           <span>Total:</span>
           <span className="text-orange-600">${total.toFixed(2)}</span>
         </div>
 
         <button
           onClick={clearCart}
-          className="w-full bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors duration-200 text-sm font-medium"
+          className="w-full bg-gray-300 text-gray-700 py-2 sm:py-2 rounded-lg hover:bg-gray-400 transition-colors duration-200 text-xs sm:text-sm font-medium"
         >
           Limpiar carrito
         </button>
