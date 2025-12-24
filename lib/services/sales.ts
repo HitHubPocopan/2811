@@ -372,4 +372,44 @@ export const salesService = {
       return [];
     }
   },
+
+  async getProductsByDayAndPos(posNumber: number, date: string): Promise<Array<{ product_name: string; quantity: number; subtotal: number }>> {
+    try {
+      const dayStart = new Date(date + 'T03:00:00');
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('*')
+        .eq('pos_number', posNumber)
+        .gte('created_at', dayStart.toISOString())
+        .lt('created_at', dayEnd.toISOString());
+
+      if (error || !sales) {
+        return [];
+      }
+
+      const productCounts: Record<string, { product_name: string; quantity: number; subtotal: number }> = {};
+
+      sales.forEach((sale) => {
+        sale.items.forEach((item: SaleItem) => {
+          if (!productCounts[item.product_id]) {
+            productCounts[item.product_id] = {
+              product_name: item.product_name,
+              quantity: 0,
+              subtotal: 0,
+            };
+          }
+          productCounts[item.product_id].quantity += item.quantity;
+          productCounts[item.product_id].subtotal += item.subtotal;
+        });
+      });
+
+      return Object.values(productCounts)
+        .sort((a, b) => b.quantity - a.quantity);
+    } catch {
+      return [];
+    }
+  },
 };

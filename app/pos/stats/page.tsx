@@ -8,6 +8,7 @@ import { salesService } from '@/lib/services/sales';
 import { POSDashboardStats, Sale } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import * as XLSX from 'xlsx';
 
 interface HourlyData {
   hour: string;
@@ -176,6 +177,36 @@ export default function StatsPage() {
   const [salesPerHour, setSalesPerHour] = useState<HourlyData[]>([]);
   const [weatherByDate, setWeatherByDate] = useState<Record<string, DayWeatherDetail>>({});
   const [loading, setLoading] = useState(true);
+  const [exportingDate, setExportingDate] = useState<string | null>(null);
+
+  const handleExportToExcel = async (date: string) => {
+    setExportingDate(date);
+    try {
+      const products = await salesService.getProductsByDayAndPos(user?.pos_number || 0, date);
+
+      const dataForExcel = products.map((product) => ({
+        'Producto': product.product_name,
+        'Cantidad': product.quantity,
+        'Total': `$${product.subtotal.toFixed(2)}`
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
+
+      worksheet['!cols'] = [
+        { wch: 35 },
+        { wch: 12 },
+        { wch: 12 }
+      ];
+
+      XLSX.writeFile(workbook, `Ventas_${date}.xlsx`);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+    } finally {
+      setExportingDate(null);
+    }
+  };
 
   const getSalesPerHour = async (posNumber: number, days = 30) => {
     try {
@@ -410,6 +441,7 @@ export default function StatsPage() {
                           <th className="px-4 py-3 text-left font-semibold text-gray-700">Fecha</th>
                           <th className="px-4 py-3 text-left font-semibold text-gray-700">Clima</th>
                           <th className="px-4 py-3 text-right font-semibold text-gray-700">Total Vendido</th>
+                          <th className="px-4 py-3 text-center font-semibold text-gray-700">Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -435,6 +467,15 @@ export default function StatsPage() {
                                 )}
                               </td>
                               <td className="px-4 py-3 text-right font-bold text-orange-600">${day.total.toFixed(2)}</td>
+                              <td className="px-4 py-3 text-center">
+                                <button
+                                  onClick={() => handleExportToExcel(day.date)}
+                                  disabled={exportingDate === day.date}
+                                  className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-3 py-1 rounded text-xs font-semibold transition"
+                                >
+                                  {exportingDate === day.date ? 'Exportando...' : 'Exportar'}
+                                </button>
+                              </td>
                             </tr>
                           );
                         })}
