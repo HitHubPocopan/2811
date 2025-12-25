@@ -63,6 +63,7 @@ export default function SalesHistoryPage() {
   };
 
   const handleExportProducts = async () => {
+    if (!user) return;
     setExportingProducts(true);
     try {
       const productsByCategory = await salesService.getAllProductsSoldByPos(user.id);
