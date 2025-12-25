@@ -20,6 +20,7 @@ export default function SalesHistoryPage() {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteMessage, setDeleteMessage] = useState('');
   const [exportingProducts, setExportingProducts] = useState(false);
+  const [exportFromDate, setExportFromDate] = useState('');
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -66,7 +67,7 @@ export default function SalesHistoryPage() {
     if (!user) return;
     setExportingProducts(true);
     try {
-      const productsByCategory = await salesService.getAllProductsSoldByPos(user.id);
+      const productsByCategory = await salesService.getAllProductsSoldByPos(user.id, exportFromDate || undefined);
       
       const workbook = XLSX.utils.book_new();
       
@@ -85,7 +86,11 @@ export default function SalesHistoryPage() {
         XLSX.utils.book_append_sheet(workbook, worksheet, category.substring(0, 31));
       });
       
-      XLSX.writeFile(workbook, `Productos_Vendidos_${new Date().toISOString().split('T')[0]}.xlsx`);
+      const fileName = exportFromDate 
+        ? `Productos_Vendidos_desde_${exportFromDate}.xlsx`
+        : `Productos_Vendidos_${new Date().toISOString().split('T')[0]}.xlsx`;
+      
+      XLSX.writeFile(workbook, fileName);
     } catch (error) {
       console.error('Error al exportar:', error);
     } finally {
@@ -150,15 +155,24 @@ export default function SalesHistoryPage() {
       )}
       
       <div className="max-w-6xl mx-auto p-3 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <div className="flex flex-col gap-4 mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Historial de ventas</h1>
-          <button
-            onClick={handleExportProducts}
-            disabled={exportingProducts}
-            className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold text-sm transition w-full sm:w-auto"
-          >
-            {exportingProducts ? 'Exportando...' : 'Exportar Excel'}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <label className="text-sm font-semibold text-gray-700">Exportar ventas desde:</label>
+            <input
+              type="date"
+              value={exportFromDate}
+              onChange={(e) => setExportFromDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm text-black"
+            />
+            <button
+              onClick={handleExportProducts}
+              disabled={exportingProducts}
+              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold text-sm transition w-full sm:w-auto"
+            >
+              {exportingProducts ? 'Exportando...' : 'Exportar Excel'}
+            </button>
+          </div>
         </div>
 
         {loading ? (

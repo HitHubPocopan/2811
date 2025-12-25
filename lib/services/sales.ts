@@ -413,12 +413,19 @@ export const salesService = {
     }
   },
 
-  async getAllProductsSoldByPos(posId: string): Promise<Record<string, Array<{ product_name: string; quantity: number }>>> {
+  async getAllProductsSoldByPos(posId: string, fromDate?: string): Promise<Record<string, Array<{ product_name: string; quantity: number }>>> {
     try {
-      const { data: sales, error } = await supabase
+      let query = supabase
         .from('sales')
         .select('*')
         .eq('pos_id', posId);
+
+      if (fromDate) {
+        const startDate = new Date(fromDate + 'T00:00:00');
+        query = query.gte('created_at', startDate.toISOString());
+      }
+
+      const { data: sales, error } = await query;
 
       if (error || !sales) {
         return {};

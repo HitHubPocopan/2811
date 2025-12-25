@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore, useCartStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
-import { salesService } from '@/lib/services/sales';
 import { Product, SaleItem, PaymentMethod, PaymentBreakdown } from '@/lib/types';
 
 export default function CheckoutPage() {
@@ -82,20 +81,35 @@ export default function CheckoutPage() {
       };
     }
 
-    const sale = await salesService.createSale(
-      user.id,
-      user.pos_number || 0,
-      saleItems,
-      total,
-      paymentMethod,
-      paymentBreakdown
-    );
+    try {
+      const response = await fetch('/api/sales', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          posId: user.id,
+          posNumber: user.pos_number || 0,
+          items: saleItems,
+          total,
+          paymentMethod,
+          paymentBreakdown,
+        }),
+      });
 
-    if (sale) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Error al procesar la venta. Intenta nuevamente.');
+        setProcessing(false);
+        return;
+      }
+
       clearCart();
       router.push('/pos/confirmation');
-    } else {
-      setError('Error al procesar la venta. Intenta nuevamente.');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido al procesar la venta';
+      setError(errorMessage);
       setProcessing(false);
     }
   };
