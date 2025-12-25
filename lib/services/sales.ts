@@ -412,4 +412,58 @@ export const salesService = {
       return [];
     }
   },
+
+  async getAllProductsSoldByPos(posId: string): Promise<Record<string, Array<{ product_name: string; quantity: number }>>> {
+    try {
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('*')
+        .eq('pos_id', posId);
+
+      if (error || !sales) {
+        return {};
+      }
+
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, name, category');
+
+      const productCategoryMap: Record<string, string> = {};
+      if (products) {
+        products.forEach((product: { id: string; name: string; category?: string }) => {
+          productCategoryMap[product.id] = product.category || 'Sin categoría';
+        });
+      }
+
+      const productsByCategory: Record<string, Record<string, number>> = {};
+
+      sales.forEach((sale) => {
+        sale.items.forEach((item: SaleItem) => {
+          const category = productCategoryMap[item.product_id] || 'Sin categoría';
+          
+          if (!productsByCategory[category]) {
+            productsByCategory[category] = {};
+          }
+          
+          if (!productsByCategory[category][item.product_name]) {
+            productsByCategory[category][item.product_name] = 0;
+          }
+          
+          productsByCategory[category][item.product_name] += item.quantity;
+        });
+      });
+
+      const result: Record<string, Array<{ product_name: string; quantity: number }>> = {};
+      
+      Object.keys(productsByCategory).sort().forEach((category) => {
+        result[category] = Object.entries(productsByCategory[category])
+          .map(([name, qty]) => ({ product_name: name, quantity: qty }))
+          .sort((a, b) => b.quantity - a.quantity);
+      });
+
+      return result;
+    } catch {
+      return {};
+    }
+  },
 };

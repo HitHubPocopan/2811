@@ -8,6 +8,7 @@ import { salesService } from '@/lib/services/sales';
 import { Sale } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import * as XLSX from 'xlsx';
 
 export default function SalesHistoryPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function SalesHistoryPage() {
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteMessage, setDeleteMessage] = useState('');
+  const [exportingProducts, setExportingProducts] = useState(false);
 
   useEffect(() => {
     if (!user || user.role !== 'pos') {
@@ -57,6 +59,36 @@ export default function SalesHistoryPage() {
       }
     } catch {
       setDeleteMessage('Error al eliminar la venta');
+    }
+  };
+
+  const handleExportProducts = async () => {
+    setExportingProducts(true);
+    try {
+      const productsByCategory = await salesService.getAllProductsSoldByPos(user.id);
+      
+      const workbook = XLSX.utils.book_new();
+      
+      Object.entries(productsByCategory).forEach(([category, products]) => {
+        const dataForExcel = products.map((product) => ({
+          'Producto': product.product_name,
+          'Cantidad': product.quantity,
+        }));
+        
+        const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
+        worksheet['!cols'] = [
+          { wch: 40 },
+          { wch: 12 }
+        ];
+        
+        XLSX.utils.book_append_sheet(workbook, worksheet, category.substring(0, 31));
+      });
+      
+      XLSX.writeFile(workbook, `Productos_Vendidos_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+    } finally {
+      setExportingProducts(false);
     }
   };
 
@@ -117,7 +149,16 @@ export default function SalesHistoryPage() {
       )}
       
       <div className="max-w-6xl mx-auto p-3 sm:p-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Historial de ventas</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Historial de ventas</h1>
+          <button
+            onClick={handleExportProducts}
+            disabled={exportingProducts}
+            className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold text-sm transition w-full sm:w-auto"
+          >
+            {exportingProducts ? 'Exportando...' : 'Exportar Excel'}
+          </button>
+        </div>
 
         {loading ? (
           <div className="text-center py-12">Cargando historial...</div>
