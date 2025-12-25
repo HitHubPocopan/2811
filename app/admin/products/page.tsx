@@ -6,7 +6,8 @@ import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
 import { importExportService } from '@/lib/services/import-export';
-import { Product } from '@/lib/types';
+import { purchaseService } from '@/lib/services/purchases';
+import { Product, PurchaseRecord } from '@/lib/types';
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -33,6 +34,11 @@ export default function ProductsPage() {
     subcategory: '',
     image_url: '',
   });
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [selectedProductForPurchase, setSelectedProductForPurchase] = useState<string>('');
+  const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
+  const [purchaseData, setPurchaseData] = useState({ quantity: '', purchasePrice: '' });
+  const [purchaseMessage, setPurchaseMessage] = useState('');
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -41,12 +47,14 @@ export default function ProductsPage() {
     }
 
     const fetchData = async () => {
-      const [productsData, categoriesData] = await Promise.all([
+      const [productsData, categoriesData, purchasesData] = await Promise.all([
         productService.getAll(),
         productService.getCategories(),
+        purchaseService.getAllPurchases(),
       ]);
       setProducts(productsData);
       setCategories(categoriesData);
+      setPurchases(purchasesData);
       setLoading(false);
     };
 
@@ -190,6 +198,62 @@ export default function ProductsPage() {
     await importExportService.exportProductsToExcel(products);
   };
 
+  const handleAddPurchase = async () => {
+    if (!selectedProductForPurchase || !purchaseData.quantity || !purchaseData.purchasePrice) {
+      setPurchaseMessage('Por favor completa todos los campos');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/purchases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: selectedProductForPurchase,
+          quantity: parseInt(purchaseData.quantity),
+          purchasePrice: parseFloat(purchaseData.purchasePrice),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setPurchaseMessage(data.error || 'Error al registrar la compra');
+        return;
+      }
+
+      setPurchases([data, ...purchases]);
+      setSelectedProductForPurchase('');
+      setPurchaseData({ quantity: '', purchasePrice: '' });
+      setShowPurchaseModal(false);
+      setPurchaseMessage('');
+    } catch (err) {
+      setPurchaseMessage(err instanceof Error ? err.message : 'Error desconocido');
+    }
+  };
+
+  const getMarginColor = (product: Product): string => {
+    const lastPurchase = purchases.find((p) => p.product_id === product.id);
+    if (!lastPurchase) return 'bg-gray-50';
+
+    const margin = ((product.price - lastPurchase.purchase_price) / lastPurchase.purchase_price) * 100;
+    
+    if (margin >= 300) return 'bg-green-50';
+    if (margin < 100) return 'bg-yellow-50';
+    return 'bg-gray-50';
+  };
+
+  const getMarginBadgeColor = (product: Product): string => {
+    const lastPurchase = purchases.find((p) => p.product_id === product.id);
+    if (!lastPurchase) return 'bg-gray-200 text-gray-700';
+
+    const margin = ((product.price - lastPurchase.purchase_price) / lastPurchase.purchase_price) * 100;
+    
+    if (margin >= 300) return 'bg-green-200 text-green-800';
+    if (margin < 100) return 'bg-yellow-200 text-yellow-800';
+    return 'bg-gray-200 text-gray-700';
+  };
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -265,7 +329,7 @@ export default function ProductsPage() {
             )}
           </div>
           {!showForm && (
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <button
                 onClick={handleExportExcel}
                 className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
@@ -284,6 +348,17 @@ export default function ProductsPage() {
                   {importing ? 'Importando...' : 'Importar Excel'}
                 </span>
               </label>
+              <button
+                onClick={() => {
+                  setShowPurchaseModal(true);
+                  setSelectedProductForPurchase('');
+                  setPurchaseData({ quantity: '', purchasePrice: '' });
+                  setPurchaseMessage('');
+                }}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
+              >
+                📦 Cargar Compra
+              </button>
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
@@ -349,6 +424,109 @@ export default function ProductsPage() {
                     setDeleteMessage('');
                   }}
                   className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-semibold text-sm transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showPurchaseModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Cargar Compra de Mercadería</h3>
+              
+              {purchaseMessage && (
+                <div className={`p-3 rounded-lg mb-4 text-sm font-semibold ${purchaseMessage.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                  {purchaseMessage}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Producto</label>
+                  <select
+                    value={selectedProductForPurchase}
+                    onChange={(e) => setSelectedProductForPurchase(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
+                  >
+                    <option value="">Selecciona un producto</option>
+                    {products.map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name} - Venta: ${product.price.toFixed(2)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Cantidad</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={purchaseData.quantity}
+                    onChange={(e) => setPurchaseData({ ...purchaseData, quantity: e.target.value })}
+                    placeholder="Ej: 10"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Precio de Compra Unitario</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={purchaseData.purchasePrice}
+                    onChange={(e) => setPurchaseData({ ...purchaseData, purchasePrice: e.target.value })}
+                    placeholder="Ej: 25.50"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
+                  />
+                </div>
+
+                {selectedProductForPurchase && purchaseData.purchasePrice && (
+                  <div className="p-3 bg-gray-50 rounded-lg text-sm">
+                    {(() => {
+                      const product = products.find((p) => p.id === selectedProductForPurchase);
+                      const margin = product ? ((product.price - parseFloat(purchaseData.purchasePrice)) / parseFloat(purchaseData.purchasePrice)) * 100 : 0;
+                      let color = 'text-gray-700';
+                      let bgColor = 'bg-gray-50';
+                      
+                      if (margin >= 300) {
+                        color = 'text-green-700';
+                        bgColor = 'bg-green-50';
+                      } else if (margin < 100) {
+                        color = 'text-yellow-700';
+                        bgColor = 'bg-yellow-50';
+                      }
+                      
+                      return (
+                        <div className={`${bgColor} p-2 rounded`}>
+                          <p className="font-semibold text-gray-900">Margen de ganancia: <span className={color}>{margin.toFixed(1)}%</span></p>
+                          <p className="text-xs text-gray-600 mt-1">Compra: ${parseFloat(purchaseData.purchasePrice).toFixed(2)} → Venta: ${product?.price.toFixed(2)}</p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2 mt-6">
+                <button
+                  onClick={handleAddPurchase}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold transition"
+                >
+                  Registrar Compra
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPurchaseModal(false);
+                    setSelectedProductForPurchase('');
+                    setPurchaseData({ quantity: '', purchasePrice: '' });
+                    setPurchaseMessage('');
+                  }}
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-semibold transition"
                 >
                   Cancelar
                 </button>
@@ -470,49 +648,72 @@ export default function ProductsPage() {
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nombre</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Categoría</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Precio</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Precio Venta</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Precio Compra</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Ganancia</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) => (
-                  <tr key={product.id} className="border-b border-gray-100 hover:bg-orange-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">{product.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {product.category ? (
-                        <div className="flex gap-2">
-                          <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
-                            {product.category}
-                          </span>
-                          {product.subcategory && (
-                            <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
-                              {product.subcategory}
+                {filteredProducts.map((product) => {
+                  const lastPurchase = purchases.find((p) => p.product_id === product.id);
+                  const margin = lastPurchase ? ((product.price - lastPurchase.purchase_price) / lastPurchase.purchase_price) * 100 : null;
+                  
+                  return (
+                    <tr key={product.id} className={`border-b border-gray-100 hover:opacity-80 transition-colors ${getMarginColor(product)}`}>
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{product.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {product.category ? (
+                          <div className="flex gap-2">
+                            <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
+                              {product.category}
                             </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">Sin categoría</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="font-bold text-orange-600">${product.price.toFixed(2)}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm space-x-2">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                            {product.subcategory && (
+                              <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                                {product.subcategory}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">Sin categoría</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className="font-bold text-orange-600">${product.price.toFixed(2)}</span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {lastPurchase ? (
+                          <span className="font-bold text-blue-600">${lastPurchase.purchase_price.toFixed(2)}</span>
+                        ) : (
+                          <span className="text-gray-400 italic">Sin datos</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {margin !== null ? (
+                          <span className={`font-bold px-2 py-1 rounded text-xs ${getMarginBadgeColor(product)}`}>
+                            {margin.toFixed(1)}%
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 italic">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-sm space-x-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-semibold transition"
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             </div>

@@ -40,7 +40,21 @@ CREATE TABLE sales (
   pos_number INTEGER NOT NULL,
   total DECIMAL(10, 2) NOT NULL,
   items JSONB NOT NULL,
+  payment_method VARCHAR(50),
+  payment_breakdown JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Purchase Records table (Compras de mercadería)
+CREATE TABLE purchase_records (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  purchase_price DECIMAL(10, 2) NOT NULL CHECK (purchase_price > 0),
+  total_cost DECIMAL(10, 2) NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes

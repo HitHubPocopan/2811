@@ -75,3 +75,14 @@ export interface AdminDashboardStats extends DashboardStats {
   pos_stats: POSDashboardStats[];
   total_pos: number;
 }
+
+export interface PurchaseRecord {
+  id: string;
+  product_id: string;
+  quantity: number;
+  purchase_price: number;
+  total_cost: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
