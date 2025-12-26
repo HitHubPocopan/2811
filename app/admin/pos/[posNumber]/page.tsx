@@ -243,7 +243,7 @@ export default function POSDetailPage({ params }: PageProps) {
   const [salesByWeather, setSalesByWeather] = useState<WeatherSalesData[]>([]);
   const [salesByPayment, setSalesByPayment] = useState<PaymentSalesData[]>([]);
   const [loading, setLoading] = useState(true);
-  const posNumber = parseInt(params.posNumber, 10);
+  const posNumber = parseInt(params?.posNumber, 10) || 0;
 
   const getSalesPerHour = async (pos: number, days = 30) => {
     try {
@@ -336,6 +336,11 @@ export default function POSDetailPage({ params }: PageProps) {
       return;
     }
 
+    if (!posNumber || isNaN(posNumber) || posNumber < 1 || posNumber > 3) {
+      setLoading(false);
+      return;
+    }
+
     const fetchStats = async () => {
       const data = await salesService.getPosDashboard('', posNumber);
       const perHour = await getSalesPerHour(posNumber, 30);
@@ -375,6 +380,8 @@ export default function POSDetailPage({ params }: PageProps) {
 
         {loading ? (
           <div className="text-center py-12 text-gray-900 dark:text-gray-100">Cargando estadísticas...</div>
+        ) : !posNumber || isNaN(posNumber) || posNumber < 1 || posNumber > 3 ? (
+          <div className="text-center py-12 text-gray-600 dark:text-gray-400">POS no válido. Por favor, selecciona un POS válido (1, 2 ó 3).</div>
         ) : stats ? (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">

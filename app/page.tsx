@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useAuthStore } from '@/lib/store';
 import { authService } from '@/lib/services/auth';
 
@@ -91,13 +90,6 @@ export default function LoginPage() {
             {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
-          ¿No tienes cuenta?{' '}
-          <Link href="/register" className="text-orange-600 dark:text-orange-400 hover:underline font-semibold">
-            Registrarse
-          </Link>
-        </p>
       </div>
     </div>
   );
