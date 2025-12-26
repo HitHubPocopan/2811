@@ -7,7 +7,7 @@ import { useAuthStore } from '@/lib/store';
 import { salesService } from '@/lib/services/sales';
 import { POSDashboardStats, Sale } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface HourlyData {
   hour: string;
@@ -239,6 +239,7 @@ export default function POSDetailPage({ params }: PageProps) {
   const { user } = useAuthStore();
   const [stats, setStats] = useState<POSDashboardStats | null>(null);
   const [salesPerHour, setSalesPerHour] = useState<HourlyData[]>([]);
+  const [salesPerDay, setSalesPerDay] = useState<Array<{ date: string; total: number }>>([]);
   const [salesByWeather, setSalesByWeather] = useState<WeatherSalesData[]>([]);
   const [salesByPayment, setSalesByPayment] = useState<PaymentSalesData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -338,6 +339,7 @@ export default function POSDetailPage({ params }: PageProps) {
     const fetchStats = async () => {
       const data = await salesService.getPosDashboard('', posNumber);
       const perHour = await getSalesPerHour(posNumber, 30);
+      const perDay = await salesService.getSalesByDayAndPos(posNumber, 200);
       const weather = await getWeatherByPos(posNumber, 200);
       
       const { data: sales, error } = await supabase
@@ -352,6 +354,7 @@ export default function POSDetailPage({ params }: PageProps) {
       
       setStats(data);
       setSalesPerHour(perHour);
+      setSalesPerDay(perDay);
       setLoading(false);
     };
 
@@ -464,6 +467,70 @@ export default function POSDetailPage({ params }: PageProps) {
                       <Bar yAxisId="right" dataKey="percentage" fill="#3b82f6" name="Porcentaje %" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
+              <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Productos más vendidos</h2>
+              {stats.top_products.length === 0 ? (
+                <p className="text-gray-600 dark:text-gray-400">No hay datos disponibles</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={stats.top_products.slice(0, 8)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="product_name" angle={-45} textAnchor="end" height={100} stroke="#6b7280" />
+                    <YAxis stroke="#6b7280" />
+                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', backgroundColor: '#f3f4f6' }} />
+                    <Legend />
+                    <Bar dataKey="quantity" fill="#f97316" name="Cantidad" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="revenue" fill="#10b981" name="Ingresos" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
+              <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Ventas por Día (últimos 200 días)</h2>
+              {salesPerDay.length === 0 ? (
+                <p className="text-gray-600 dark:text-gray-400">No hay datos disponibles</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={salesPerDay}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="date" angle={-45} textAnchor="end" height={80} stroke="#6b7280" />
+                    <YAxis stroke="#6b7280" />
+                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', backgroundColor: '#f3f4f6' }} />
+                    <Legend />
+                    <Line type="monotone" dataKey="total" stroke="#f97316" name="Ventas del Día" strokeWidth={2} dot={{ r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
+              <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Últimas ventas</h2>
+              {stats.last_sales.length === 0 ? (
+                <p className="text-gray-600 dark:text-gray-400">No hay ventas registradas</p>
+              ) : (
+                <div className="space-y-3">
+                  {stats.last_sales.map((sale) => (
+                    <div
+                      key={sale.id}
+                      className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 bg-gray-50 dark:bg-gray-700 rounded gap-2 sm:gap-4"
+                    >
+                      <div>
+                        <p className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-gray-100">
+                          {new Date(sale.created_at).toLocaleDateString('es-AR')} -{' '}
+                          {new Date(sale.created_at).toLocaleTimeString('es-AR')}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                          {sale.items.reduce((sum, item) => sum + item.quantity, 0)} items
+                        </p>
+                      </div>
+                      <p className="font-bold text-green-600 dark:text-green-400 text-sm">${sale.total.toFixed(2)}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
