@@ -39,6 +39,8 @@ export default function ProductsPage() {
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
   const [purchaseData, setPurchaseData] = useState({ quantity: '', purchasePrice: '' });
   const [purchaseMessage, setPurchaseMessage] = useState('');
+  const [purchaseSearchTerm, setPurchaseSearchTerm] = useState('');
+  const [showPurchaseDropdown, setShowPurchaseDropdown] = useState(false);
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -225,12 +227,17 @@ export default function ProductsPage() {
       setPurchases([data, ...purchases]);
       setSelectedProductForPurchase('');
       setPurchaseData({ quantity: '', purchasePrice: '' });
+      setPurchaseSearchTerm('');
       setShowPurchaseModal(false);
       setPurchaseMessage('');
     } catch (err) {
       setPurchaseMessage(err instanceof Error ? err.message : 'Error desconocido');
     }
   };
+
+  const filteredProductsForPurchase = products.filter((product) =>
+    product.name.toLowerCase().includes(purchaseSearchTerm.toLowerCase())
+  );
 
   const getMarginColor = (product: Product): string => {
     const lastPurchase = purchases.find((p) => p.product_id === product.id);
@@ -273,108 +280,113 @@ export default function ProductsPage() {
     <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col overflow-hidden">
       <Navbar />
       <div className="max-w-7xl mx-auto p-6 lg:p-8 flex-1 flex flex-col overflow-hidden w-full">
-        <div className="flex justify-between items-start mb-8 gap-6">
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-gray-900">Gestión de Productos</h1>
-            <p className="text-gray-600 mt-2">Administra tu catálogo de productos ({filteredProducts.length} de {products.length})</p>
-            
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">Gestión de Productos</h1>
+              <p className="text-gray-600 mt-1">Administra tu catálogo de productos ({filteredProducts.length} de {products.length})</p>
+            </div>
             {!showForm && (
-              <div className="mt-4 space-y-3">
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={handleExportExcel}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm"
+                >
+                  📊 Exportar
+                </button>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleImportExcel}
+                    disabled={importing}
+                    className="hidden"
+                  />
+                  <span className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm">
+                    {importing ? '⏳ Importando...' : '📥 Importar'}
+                  </span>
+                </label>
+                <button
+                  onClick={() => {
+                    setShowPurchaseModal(true);
+                    setSelectedProductForPurchase('');
+                    setPurchaseSearchTerm('');
+                    setPurchaseData({ quantity: '', purchasePrice: '' });
+                    setPurchaseMessage('');
+                  }}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm"
+                >
+                  📦 Compra
+                </button>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm"
+                >
+                  ➕ Producto
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteCatalogModal(true);
+                    setDeletePassword('');
+                    setDeleteMessage('');
+                  }}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm"
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
+            )}
+          </div>
+
+          {!showForm && (
+            <div className="bg-white rounded-xl shadow-sm p-4 space-y-3 border border-gray-200">
+              <div>
                 <input
                   type="text"
-                  placeholder="Buscar por nombre o descripción..."
+                  placeholder="🔍 Buscar por nombre o descripción..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm text-sm text-black"
                 />
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Categoría</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => {
+                      setSelectedCategory(e.target.value);
+                      setSelectedSubcategory('');
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm text-black"
+                  >
+                    <option value="">Todas ({categories.length})</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Categoría</label>
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => {
-                        setSelectedCategory(e.target.value);
-                        setSelectedSubcategory('');
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm text-black"
-                    >
-                      <option value="">Todas ({categories.length})</option>
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Sub-Categoría</label>
-                    <select
-                      value={selectedSubcategory}
-                      onChange={(e) => setSelectedSubcategory(e.target.value)}
-                      disabled={!selectedCategory}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
-                    >
-                      <option value="">Todas ({subcategories.length})</option>
-                      {subcategories.map((subcat) => (
-                        <option key={subcat} value={subcat}>
-                          {subcat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Sub-Categoría</label>
+                  <select
+                    value={selectedSubcategory}
+                    onChange={(e) => setSelectedSubcategory(e.target.value)}
+                    disabled={!selectedCategory}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                  >
+                    <option value="">Todas ({subcategories.length})</option>
+                    {subcategories.map((subcat) => (
+                      <option key={subcat} value={subcat}>
+                        {subcat}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            )}
-          </div>
-          {!showForm && (
-            <div className="flex gap-3 flex-wrap">
-              <button
-                onClick={handleExportExcel}
-                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
-              >
-                Exportar Excel
-              </button>
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleImportExcel}
-                  disabled={importing}
-                  className="hidden"
-                />
-                <span className="inline-block bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold">
-                  {importing ? 'Importando...' : 'Importar Excel'}
-                </span>
-              </label>
-              <button
-                onClick={() => {
-                  setShowPurchaseModal(true);
-                  setSelectedProductForPurchase('');
-                  setPurchaseData({ quantity: '', purchasePrice: '' });
-                  setPurchaseMessage('');
-                }}
-                className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
-              >
-                📦 Cargar Compra
-              </button>
-              <button
-                onClick={() => setShowForm(true)}
-                className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
-              >
-                + Nuevo producto
-              </button>
-              <button
-                onClick={() => {
-                  setShowDeleteCatalogModal(true);
-                  setDeletePassword('');
-                  setDeleteMessage('');
-                }}
-                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow font-semibold"
-              >
-                Eliminar Catalogo
-              </button>
             </div>
           )}
         </div>
@@ -433,78 +445,133 @@ export default function ProductsPage() {
         )}
 
         {showPurchaseModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Cargar Compra de Mercadería</h3>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">📦 Cargar Compra</h3>
+                <button
+                  onClick={() => {
+                    setShowPurchaseModal(false);
+                    setSelectedProductForPurchase('');
+                    setPurchaseSearchTerm('');
+                    setPurchaseData({ quantity: '', purchasePrice: '' });
+                    setPurchaseMessage('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                >
+                  ✕
+                </button>
+              </div>
               
               {purchaseMessage && (
-                <div className={`p-3 rounded-lg mb-4 text-sm font-semibold ${purchaseMessage.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                <div className={`p-3 rounded-lg mb-4 text-sm font-semibold border ${purchaseMessage.includes('Error') ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
                   {purchaseMessage}
                 </div>
               )}
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Producto</label>
-                  <select
-                    value={selectedProductForPurchase}
-                    onChange={(e) => setSelectedProductForPurchase(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
-                  >
-                    <option value="">Selecciona un producto</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.name} - Venta: ${product.price.toFixed(2)}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">🔍 Producto</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Busca un producto..."
+                      value={purchaseSearchTerm}
+                      onChange={(e) => {
+                        setPurchaseSearchTerm(e.target.value);
+                        setShowPurchaseDropdown(true);
+                      }}
+                      onFocus={() => setShowPurchaseDropdown(true)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
+                    />
+                    {showPurchaseDropdown && filteredProductsForPurchase.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto z-10">
+                        {filteredProductsForPurchase.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => {
+                              setSelectedProductForPurchase(product.id);
+                              setPurchaseSearchTerm(product.name);
+                              setShowPurchaseDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-purple-50 border-b border-gray-100 last:border-b-0 transition-colors text-black text-sm"
+                          >
+                            <div className="font-semibold text-gray-900">{product.name}</div>
+                            <div className="text-xs text-gray-600">Venta: ${product.price.toFixed(2)}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {selectedProductForPurchase && (
+                    <div className="mt-2 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                      <p className="text-xs font-semibold text-purple-700">Producto seleccionado</p>
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Cantidad</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={purchaseData.quantity}
-                    onChange={(e) => setPurchaseData({ ...purchaseData, quantity: e.target.value })}
-                    placeholder="Ej: 10"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
-                  />
-                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">📊 Cantidad</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={purchaseData.quantity}
+                      onChange={(e) => setPurchaseData({ ...purchaseData, quantity: e.target.value })}
+                      placeholder="10"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black font-semibold"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Precio de Compra Unitario</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={purchaseData.purchasePrice}
-                    onChange={(e) => setPurchaseData({ ...purchaseData, purchasePrice: e.target.value })}
-                    placeholder="Ej: 25.50"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black"
-                  />
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">💵 Precio Unit.</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={purchaseData.purchasePrice}
+                      onChange={(e) => setPurchaseData({ ...purchaseData, purchasePrice: e.target.value })}
+                      placeholder="25.50"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-black font-semibold"
+                    />
+                  </div>
                 </div>
 
                 {selectedProductForPurchase && purchaseData.purchasePrice && (
-                  <div className="p-3 bg-gray-50 rounded-lg text-sm">
+                  <div className="rounded-lg text-sm border-2">
                     {(() => {
                       const product = products.find((p) => p.id === selectedProductForPurchase);
                       const margin = product ? ((product.price - parseFloat(purchaseData.purchasePrice)) / parseFloat(purchaseData.purchasePrice)) * 100 : 0;
-                      let color = 'text-gray-700';
+                      let borderColor = 'border-gray-300';
                       let bgColor = 'bg-gray-50';
+                      let color = 'text-gray-700';
+                      let badge = '📊';
                       
                       if (margin >= 300) {
-                        color = 'text-green-700';
+                        borderColor = 'border-green-300';
                         bgColor = 'bg-green-50';
+                        color = 'text-green-700';
+                        badge = '🟢';
                       } else if (margin < 100) {
-                        color = 'text-yellow-700';
+                        borderColor = 'border-yellow-300';
                         bgColor = 'bg-yellow-50';
+                        color = 'text-yellow-700';
+                        badge = '🟡';
+                      } else {
+                        borderColor = 'border-blue-300';
+                        bgColor = 'bg-blue-50';
+                        color = 'text-blue-700';
+                        badge = '🔵';
                       }
                       
                       return (
-                        <div className={`${bgColor} p-2 rounded`}>
-                          <p className="font-semibold text-gray-900">Margen de ganancia: <span className={color}>{margin.toFixed(1)}%</span></p>
-                          <p className="text-xs text-gray-600 mt-1">Compra: ${parseFloat(purchaseData.purchasePrice).toFixed(2)} → Venta: ${product?.price.toFixed(2)}</p>
+                        <div className={`${bgColor} ${borderColor} p-3 rounded-lg border-2`}>
+                          <p className="font-bold text-gray-900 mb-2">{badge} Margen: <span className={color}>{margin.toFixed(1)}%</span></p>
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <p>💵 Compra: <span className="font-semibold">${parseFloat(purchaseData.purchasePrice).toFixed(2)}</span></p>
+                            <p>🏷️ Venta: <span className="font-semibold text-orange-600">${product?.price.toFixed(2)}</span></p>
+                            <p>💰 Ganancia: <span className="font-semibold">${(product ? product.price - parseFloat(purchaseData.purchasePrice) : 0).toFixed(2)} por unidad</span></p>
+                          </div>
                         </div>
                       );
                     })()}
@@ -515,20 +582,22 @@ export default function ProductsPage() {
               <div className="flex gap-2 mt-6">
                 <button
                   onClick={handleAddPurchase}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg font-semibold transition"
+                  disabled={!selectedProductForPurchase || !purchaseData.quantity || !purchaseData.purchasePrice}
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
                 >
-                  Registrar Compra
+                  ✓ Registrar
                 </button>
                 <button
                   onClick={() => {
                     setShowPurchaseModal(false);
                     setSelectedProductForPurchase('');
+                    setPurchaseSearchTerm('');
                     setPurchaseData({ quantity: '', purchasePrice: '' });
                     setPurchaseMessage('');
                   }}
-                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-semibold transition"
+                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 px-4 py-2 rounded-lg font-semibold transition text-sm"
                 >
-                  Cancelar
+                  ✕ Cancelar
                 </button>
               </div>
             </div>
