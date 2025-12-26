@@ -33,6 +33,7 @@ interface WeatherSalesData {
 interface PaymentSalesData {
   name: string;
   value: number;
+  [key: string]: string | number;
 }
 
 const LOCATION_COORDINATES: Record<number, { lat: number; lon: number }> = {

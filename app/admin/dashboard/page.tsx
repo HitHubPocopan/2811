@@ -13,6 +13,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 interface PaymentSalesData {
   name: string;
   value: number;
+  [key: string]: string | number;
 }
 
 export default function AdminDashboardPage() {
