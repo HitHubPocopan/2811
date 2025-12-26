@@ -127,15 +127,15 @@ export default function CatalogPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col overflow-hidden" style={{ WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility' }}>
+    <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 flex flex-col overflow-hidden" style={{ WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility' }}>
       <Navbar />
       <div className="flex-1 flex flex-col xl:flex-row overflow-hidden gap-4 xl:gap-6 p-3 sm:p-4 xl:p-8">
-        <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-lg sm:rounded-xl shadow-lg">
-          <div className="flex-shrink-0 p-3 sm:p-4 lg:p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-slate-50">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-lg">
+          <div className="flex-shrink-0 p-3 sm:p-4 lg:p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-orange-50 to-slate-50 dark:from-gray-700 dark:to-gray-800">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">Catálogo de Productos</h1>
-                <p className="text-gray-600">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Catálogo de Productos</h1>
+                <p className="text-gray-600 dark:text-gray-400">
                   Mostrando {filteredProducts.length} de {products.length} productos
                 </p>
               </div>

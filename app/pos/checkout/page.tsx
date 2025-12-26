@@ -121,21 +121,21 @@ export default function CheckoutPage() {
   const total = getTotal();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
       <div className="max-w-2xl mx-auto p-3 sm:p-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Confirmación de venta</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">Confirmación de venta</h1>
 
-        <div className="bg-white p-4 sm:p-6 rounded-lg shadow mb-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-4">Resumen de venta</h2>
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Resumen de venta</h2>
           <div className="space-y-3">
             {items.map((item) => {
               const product = products.find((p) => p.id === item.product_id);
               return (
                 <div key={item.product_id} className="flex justify-between pb-3 border-b">
                   <div>
-                    <p className="font-semibold text-sm sm:text-base">{product?.name}</p>
-                    <p className="text-xs sm:text-sm text-gray-600">
+                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">{product?.name}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       ${item.price.toFixed(2)} x {item.quantity}
                     </p>
                   </div>
@@ -147,16 +147,16 @@ export default function CheckoutPage() {
             })}
           </div>
 
-          <div className="mt-6 pt-4 border-t-2">
-            <div className="flex justify-between text-xl sm:text-2xl font-bold">
+          <div className="mt-6 pt-4 border-t-2 border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               <span>Total:</span>
-              <span className="text-green-600">${total.toFixed(2)}</span>
+              <span className="text-green-600 dark:text-green-400">${total.toFixed(2)}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 sm:p-6 rounded-lg shadow mb-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-4">Método de pago</h2>
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow mb-6">
+          <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Método de pago</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
             {(['Efectivo', 'Transferencia', 'QR', 'Débito', 'Crédito', 'Mixto'] as PaymentMethod[]).map((method) => (
               <button
