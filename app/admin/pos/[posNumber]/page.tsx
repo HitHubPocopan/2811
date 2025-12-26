@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
 import { salesService } from '@/lib/services/sales';
@@ -228,14 +228,9 @@ function getSalesByPaymentMethod(sales: Sale[]): PaymentSalesData[] {
     .sort((a, b) => b.value - a.value);
 }
 
-interface PageProps {
-  params: {
-    posNumber: string;
-  };
-}
-
-export default function POSDetailPage({ params }: PageProps) {
+export default function POSDetailPage() {
   const router = useRouter();
+  const params = useParams();
   const { user } = useAuthStore();
   const [stats, setStats] = useState<POSDashboardStats | null>(null);
   const [salesPerHour, setSalesPerHour] = useState<HourlyData[]>([]);
@@ -243,7 +238,7 @@ export default function POSDetailPage({ params }: PageProps) {
   const [salesByWeather, setSalesByWeather] = useState<WeatherSalesData[]>([]);
   const [salesByPayment, setSalesByPayment] = useState<PaymentSalesData[]>([]);
   const [loading, setLoading] = useState(true);
-  const posNumber = parseInt(params?.posNumber, 10) || 0;
+  const posNumber = parseInt(params.posNumber as string, 10) || 0;
 
   const getSalesPerHour = async (pos: number, days = 30) => {
     try {
@@ -336,35 +331,44 @@ export default function POSDetailPage({ params }: PageProps) {
       return;
     }
 
-    if (!posNumber || isNaN(posNumber) || posNumber < 1 || posNumber > 3) {
+    if (!params.posNumber) {
+      return;
+    }
+
+    if (isNaN(posNumber) || posNumber < 1 || posNumber > 3) {
       setLoading(false);
       return;
     }
 
     const fetchStats = async () => {
-      const data = await salesService.getPosDashboard('', posNumber);
-      const perHour = await getSalesPerHour(posNumber, 30);
-      const perDay = await salesService.getSalesByDayAndPos(posNumber, 200);
-      const weather = await getWeatherByPos(posNumber, 200);
-      
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('*')
-        .eq('pos_number', posNumber);
-      
-      if (!error && sales) {
-        setSalesByWeather(getSalesByWeatherAndHour(sales, weather));
-        setSalesByPayment(getSalesByPaymentMethod(sales));
+      try {
+        const data = await salesService.getPosDashboard('', posNumber);
+        const perHour = await getSalesPerHour(posNumber, 30);
+        const perDay = await salesService.getSalesByDayAndPos(posNumber, 200);
+        const weather = await getWeatherByPos(posNumber, 200);
+        
+        const { data: sales, error } = await supabase
+          .from('sales')
+          .select('*')
+          .eq('pos_number', posNumber);
+        
+        if (!error && sales) {
+          setSalesByWeather(getSalesByWeatherAndHour(sales, weather));
+          setSalesByPayment(getSalesByPaymentMethod(sales));
+        }
+        
+        setStats(data);
+        setSalesPerHour(perHour);
+        setSalesPerDay(perDay);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      setStats(data);
-      setSalesPerHour(perHour);
-      setSalesPerDay(perDay);
-      setLoading(false);
     };
 
     fetchStats();
-  }, [user, router, posNumber]);
+  }, [user, router, posNumber, params.posNumber]);
 
   if (!user) {
     return null;
@@ -380,7 +384,7 @@ export default function POSDetailPage({ params }: PageProps) {
 
         {loading ? (
           <div className="text-center py-12 text-gray-900 dark:text-gray-100">Cargando estadísticas...</div>
-        ) : !posNumber || isNaN(posNumber) || posNumber < 1 || posNumber > 3 ? (
+        ) : isNaN(posNumber) || posNumber < 1 || posNumber > 3 ? (
           <div className="text-center py-12 text-gray-600 dark:text-gray-400">POS no válido. Por favor, selecciona un POS válido (1, 2 ó 3).</div>
         ) : stats ? (
           <div className="space-y-6">
