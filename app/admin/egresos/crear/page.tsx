@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
-import { ExpenseCategory, ExpenseItem } from '@/lib/types';
+import { ExpenseCategory, ExpenseItem, Product } from '@/lib/types';
+import { productService } from '@/lib/services/products';
 
 interface FormItem extends ExpenseItem {
   id: string;
+  product_id?: string;
 }
 
 const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Servicios', 'Gastos Operativos', 'Otros'];
@@ -23,6 +25,18 @@ export default function CreateExpensePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [showNewProductModal, setShowNewProductModal] = useState(false);
+  const [newProductForm, setNewProductForm] = useState({
+    name: '',
+    description: '',
+    price: 0,
+    stock: 0,
+    category: '',
+    subcategory: '',
+    image_url: '',
+  });
+  const [creatingProduct, setCreatingProduct] = useState(false);
 
   const [category, setCategory] = useState<ExpenseCategory>('Compra de Inventario');
   const [posNumber, setPosNumber] = useState<number | null>(null);
@@ -35,8 +49,53 @@ export default function CreateExpensePage() {
   useEffect(() => {
     if (!user || user.role !== 'admin') {
       router.push('/');
+      return;
     }
+    loadProducts();
   }, [user, router]);
+
+  const loadProducts = async () => {
+    const prods = await productService.getAll();
+    setProducts(prods);
+  };
+
+  const handleCreateProduct = async () => {
+    if (!newProductForm.name.trim()) {
+      alert('El nombre del producto es requerido');
+      return;
+    }
+
+    setCreatingProduct(true);
+    try {
+      const createdProduct = await productService.create({
+        name: newProductForm.name,
+        description: newProductForm.description,
+        price: newProductForm.price,
+        stock: newProductForm.stock,
+        category: newProductForm.category || undefined,
+        subcategory: newProductForm.subcategory || undefined,
+        image_url: newProductForm.image_url,
+      });
+
+      if (createdProduct) {
+        setProducts([...products, createdProduct]);
+        setShowNewProductModal(false);
+        setNewProductForm({
+          name: '',
+          description: '',
+          price: 0,
+          stock: 0,
+          category: '',
+          subcategory: '',
+          image_url: '',
+        });
+      } else {
+        alert('Error al crear el producto');
+      }
+    } finally {
+      setCreatingProduct(false);
+    }
+  };
 
   const addItem = () => {
     setItems([
@@ -47,6 +106,7 @@ export default function CreateExpensePage() {
         quantity: 1,
         unit_price: 0,
         subtotal: 0,
+        product_id: undefined,
       },
     ]);
   };
@@ -60,9 +120,18 @@ export default function CreateExpensePage() {
       items.map((item) => {
         if (item.id === id) {
           const updated = { ...item, [field]: value };
-          if (field === 'quantity' || field === 'unit_price') {
+          
+          if (field === 'product_id') {
+            const selectedProduct = products.find((p) => p.id === value);
+            if (selectedProduct) {
+              updated.description = selectedProduct.name;
+              updated.unit_price = selectedProduct.price;
+              updated.subtotal = updated.quantity * selectedProduct.price;
+            }
+          } else if (field === 'quantity' || field === 'unit_price') {
             updated.subtotal = updated.quantity * updated.unit_price;
           }
+          
           return updated;
         }
         return item;
@@ -242,15 +311,24 @@ export default function CreateExpensePage() {
 
           {/* Artículos */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Artículos</h2>
-              <button
-                type="button"
-                onClick={addItem}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition"
-              >
-                + Agregar Artículo
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                >
+                  + Agregar Artículo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNewProductModal(true)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                >
+                  + Producto Nuevo
+                </button>
+              </div>
             </div>
 
             {items.length === 0 ? (
@@ -261,17 +339,35 @@ export default function CreateExpensePage() {
               <div className="space-y-4">
                 {items.map((item) => (
                   <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                          Descripción
+                          Producto del Catálogo
+                        </label>
+                        <select
+                          value={item.product_id || ''}
+                          onChange={(e) => updateItem(item.id, 'product_id', e.target.value || undefined)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
+                        >
+                          <option value="">Seleccionar producto...</option>
+                          {products.map((prod) => (
+                            <option key={prod.id} value={prod.id}>
+                              {prod.name} - ${prod.price.toFixed(2)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                          O Descripción manual
                         </label>
                         <input
                           type="text"
                           value={item.description}
                           onChange={(e) => updateItem(item.id, 'description', e.target.value)}
                           placeholder="Ej: Café gourmet"
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
+                          disabled={!!item.product_id}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
                         />
                       </div>
                       <div>
@@ -288,6 +384,16 @@ export default function CreateExpensePage() {
                         />
                       </div>
                     </div>
+                    
+                    {item.product_id && (
+                      <button
+                        type="button"
+                        onClick={() => updateItem(item.id, 'product_id', undefined)}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        ← Desseleccionar producto
+                      </button>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
@@ -392,6 +498,127 @@ export default function CreateExpensePage() {
             </button>
           </div>
         </form>
+
+        {/* Modal - Crear Producto Nuevo */}
+        {showNewProductModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Crear Producto Nuevo</h2>
+                  <button
+                    onClick={() => setShowNewProductModal(false)}
+                    disabled={creatingProduct}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl disabled:opacity-50"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Nombre del Producto *
+                  </label>
+                  <input
+                    type="text"
+                    value={newProductForm.name}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, name: e.target.value })}
+                    placeholder="Ej: Café gourmet premium"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Descripción
+                  </label>
+                  <textarea
+                    value={newProductForm.description}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, description: e.target.value })}
+                    placeholder="Detalles del producto..."
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Precio ($) *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={newProductForm.price}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, price: parseFloat(e.target.value) || 0 })}
+                    placeholder="0.00"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Stock inicial
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={newProductForm.stock}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, stock: parseInt(e.target.value) || 0 })}
+                    placeholder="0"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Categoría
+                  </label>
+                  <input
+                    type="text"
+                    value={newProductForm.category}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, category: e.target.value })}
+                    placeholder="Ej: Bebidas"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Subcategoría
+                  </label>
+                  <input
+                    type="text"
+                    value={newProductForm.subcategory}
+                    onChange={(e) => setNewProductForm({ ...newProductForm, subcategory: e.target.value })}
+                    placeholder="Ej: Café"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowNewProductModal(false)}
+                    disabled={creatingProduct}
+                    className="flex-1 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreateProduct}
+                    disabled={creatingProduct || !newProductForm.name.trim()}
+                    className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
+                  >
+                    {creatingProduct ? 'Creando...' : 'Crear Producto'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

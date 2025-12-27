@@ -24,6 +24,7 @@ export default function AdminDashboardPage() {
   const [allSales, setAllSales] = useState<Sale[]>([]);
   const [salesPerDay, setSalesPerDay] = useState<Array<{ date: string; total: number; pos1: number; pos2: number; pos3: number }>>([]);
   const [salesByPayment, setSalesByPayment] = useState<PaymentSalesData[]>([]);
+  const [totalExpenses, setTotalExpenses] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -60,6 +61,16 @@ export default function AdminDashboardPage() {
       if (posData) posDataArray.push(posData);
     }
     setPosStats(posDataArray);
+
+    try {
+      const expensesResponse = await fetch('/api/egresos');
+      const expenses = await expensesResponse.json();
+      const total = Array.isArray(expenses) ? expenses.reduce((sum, exp) => sum + (exp.total || 0), 0) : 0;
+      setTotalExpenses(total);
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      setTotalExpenses(0);
+    }
 
     setLoading(false);
   };
@@ -127,7 +138,7 @@ export default function AdminDashboardPage() {
           </div>
         ) : stats ? (
           <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border-l-4 border-orange-500">
                 <div className="flex items-center justify-between">
                   <div>
@@ -153,6 +164,15 @@ export default function AdminDashboardPage() {
                     <p className="text-4xl font-bold text-gray-900 dark:text-white">{stats.total_items_sold}</p>
                   </div>
                   <div className="text-5xl text-purple-100">📦</div>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border-l-4 border-red-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Total de egresos</p>
+                    <p className="text-4xl font-bold text-gray-900 dark:text-white">${totalExpenses.toFixed(2)}</p>
+                  </div>
+                  <div className="text-5xl text-red-100">📉</div>
                 </div>
               </div>
             </div>
