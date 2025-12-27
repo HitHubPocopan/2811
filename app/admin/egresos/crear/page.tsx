@@ -210,7 +210,13 @@ export default function CreateExpensePage() {
           createdBy: user.id,
           posNumber: posNumber || undefined,
           category,
-          items: items.map(({ id: _, ...rest }) => rest),
+          items: items.map((item) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price || 0,
+            purchase_price: item.purchase_price || 0,
+            subtotal: item.subtotal,
+          })),
           subtotal,
           shippingCost: shippingCost || undefined,
           total,
@@ -455,8 +461,9 @@ export default function CreateExpensePage() {
                             type="number"
                             min="1"
                             step="0.01"
-                            value={item.quantity}
-                            onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                            value={item.quantity || ''}
+                            onChange={(e) => updateItem(item.id, 'quantity', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                            placeholder="1"
                             disabled={item.confirmed}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
                           />
