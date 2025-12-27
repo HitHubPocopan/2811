@@ -195,8 +195,8 @@ export default function CreateExpensePage() {
       return;
     }
 
-    if (items.some((item) => !item.description.trim() || item.quantity <= 0 || item.purchase_price < 0)) {
-      setError('Por favor, completa todos los campos correctamente');
+    if (items.some((item) => !item.description.trim() || item.quantity <= 0)) {
+      setError('Por favor, completa descripción y cantidad correctamente');
       return;
     }
 
@@ -480,8 +480,9 @@ export default function CreateExpensePage() {
                           type="number"
                           min="0"
                           step="0.01"
-                          value={item.purchase_price}
-                          onChange={(e) => updateItem(item.id, 'purchase_price', parseFloat(e.target.value) || 0)}
+                          value={item.purchase_price || ''}
+                          onChange={(e) => updateItem(item.id, 'purchase_price', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                          placeholder="0.00"
                           disabled={item.confirmed}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
                         />
