@@ -57,7 +57,7 @@ export default function ExpensesPage() {
   const handleStatusUpdate = async (expenseId: string, newStatus: string) => {
     setUpdatingId(expenseId);
     try {
-      const response = await fetch(`/api/egresos/${expenseId}`, {
+      const response = await fetch(`/api/egresos?id=${expenseId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -72,6 +72,31 @@ export default function ExpensesPage() {
       }
     } catch (error) {
       console.error('Error updating status:', error);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este egreso?')) {
+      return;
+    }
+
+    setUpdatingId(expenseId);
+    try {
+      const response = await fetch(`/api/egresos?id=${expenseId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setExpenses(expenses.filter((exp) => exp.id !== expenseId));
+        setExpandedId(null);
+      } else {
+        alert('Error al eliminar el egreso');
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      alert('Error al eliminar el egreso');
     } finally {
       setUpdatingId(null);
     }
@@ -324,6 +349,24 @@ export default function ExpensesPage() {
                         </button>
                       </div>
                     )}
+
+                    {/* Acciones de Gestión */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => router.push(`/admin/egresos/${expense.id}/editar`)}
+                        disabled={updatingId === expense.id}
+                        className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                      >
+                        ✎ Editar
+                      </button>
+                      <button
+                        onClick={() => handleDeleteExpense(expense.id)}
+                        disabled={updatingId === expense.id}
+                        className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                      >
+                        🗑 Eliminar
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

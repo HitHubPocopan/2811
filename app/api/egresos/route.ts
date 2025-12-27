@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!category || !['Compra de Inventario', 'Expensas', 'Luz', 'Internet', 'Agua', 'Otros'].includes(category)) {
+    const validCategories = ['Compra de Inventario', 'Expensas', 'Luz', 'Internet', 'Agua', 'Otros'];
+    if (category && !validCategories.includes(category)) {
       console.error('Error: Categoría inválida', category);
       return NextResponse.json(
         { error: 'Categoría de gasto inválida' },
@@ -84,7 +85,6 @@ export async function POST(request: NextRequest) {
     
     const insertData: Record<string, unknown> = {
       created_by: createdBy,
-      category,
       items: validatedItems,
       subtotal,
       shipping_cost: finalShippingCost,
@@ -92,6 +92,10 @@ export async function POST(request: NextRequest) {
       status: 'pendiente',
       payment_status: validPaymentStatus,
     };
+
+    if (category) {
+      insertData.category = category;
+    }
 
     if (posNumber && typeof posNumber === 'number' && posNumber >= 1 && posNumber <= 3) {
       insertData.pos_number = posNumber;
@@ -164,6 +168,95 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data || []);
   } catch (error) {
     console.error('GET error:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID de egreso no proporcionado' },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabaseAdmin
+      .from('egresos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+      return NextResponse.json(
+        { error: 'Error al eliminar el egreso' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('DELETE error:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID de egreso no proporcionado' },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const updateData: Record<string, unknown> = {};
+
+    if ('status' in body) {
+      updateData.status = body.status;
+    }
+    if ('payment_status' in body) {
+      updateData.payment_status = body.payment_status;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: 'No hay datos para actualizar' },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('egresos')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase update error:', error);
+      return NextResponse.json(
+        { error: 'Error al actualizar el egreso' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('PATCH error:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }
