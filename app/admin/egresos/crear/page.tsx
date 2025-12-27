@@ -10,7 +10,6 @@ import { productService } from '@/lib/services/products';
 interface FormItem extends ExpenseItem {
   id: string;
   product_id?: string;
-  showProductSearch?: boolean;
   productSearchInput?: string;
 }
 
@@ -29,6 +28,7 @@ export default function CreateExpensePage() {
   const [success, setSuccess] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [showNewProductModal, setShowNewProductModal] = useState(false);
+  const [openSearchDropdownId, setOpenSearchDropdownId] = useState<string | null>(null);
   const [newProductForm, setNewProductForm] = useState({
     name: '',
     description: '',
@@ -139,6 +139,26 @@ export default function CreateExpensePage() {
         return item;
       })
     );
+  };
+
+  const handleSelectProduct = (itemId: string, productId: string) => {
+    const selectedProduct = products.find((p) => p.id === productId);
+    setItems(
+      items.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            product_id: productId,
+            description: selectedProduct?.name || '',
+            unit_price: selectedProduct?.price || 0,
+            subtotal: item.quantity * (selectedProduct?.price || 0),
+            productSearchInput: '',
+          };
+        }
+        return item;
+      })
+    );
+    setOpenSearchDropdownId(null);
   };
 
   const calculateSubtotal = (): number => {
@@ -372,28 +392,26 @@ export default function CreateExpensePage() {
                                 type="text"
                                 value={item.productSearchInput || ''}
                                 onChange={(e) => updateItem(item.id, 'productSearchInput', e.target.value)}
-                                onFocus={() => updateItem(item.id, 'showProductSearch', true)}
-                                onBlur={() => setTimeout(() => updateItem(item.id, 'showProductSearch', false), 200)}
+                                onFocus={() => setOpenSearchDropdownId(item.id)}
+                                onBlur={() => setTimeout(() => setOpenSearchDropdownId(null), 150)}
                                 placeholder="Escribe para buscar..."
                                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
                               />
-                              {item.showProductSearch && filteredProducts.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                              {openSearchDropdownId === item.id && filteredProducts.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                   {filteredProducts.map((prod) => (
-                                    <button
+                                    <div
                                       key={prod.id}
-                                      type="button"
                                       onMouseDown={(e) => {
                                         e.preventDefault();
-                                        updateItem(item.id, 'product_id', prod.id);
-                                        updateItem(item.id, 'productSearchInput', '');
-                                        updateItem(item.id, 'showProductSearch', false);
+                                        e.stopPropagation();
+                                        handleSelectProduct(item.id, prod.id);
                                       }}
                                       className="w-full text-left px-3 py-2 hover:bg-orange-50 dark:hover:bg-gray-600 border-b border-gray-100 dark:border-gray-600 last:border-b-0 text-sm transition cursor-pointer"
                                     >
                                       <div className="font-semibold text-gray-900 dark:text-white">{prod.name}</div>
                                       <div className="text-xs text-gray-500 dark:text-gray-400">${prod.price.toFixed(2)}</div>
-                                    </button>
+                                    </div>
                                   ))}
                                 </div>
                               )}
