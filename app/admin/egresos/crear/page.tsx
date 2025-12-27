@@ -373,6 +373,7 @@ export default function CreateExpensePage() {
                                 value={item.productSearchInput || ''}
                                 onChange={(e) => updateItem(item.id, 'productSearchInput', e.target.value)}
                                 onFocus={() => updateItem(item.id, 'showProductSearch', true)}
+                                onBlur={() => setTimeout(() => updateItem(item.id, 'showProductSearch', false), 200)}
                                 placeholder="Escribe para buscar..."
                                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
                               />
@@ -382,12 +383,13 @@ export default function CreateExpensePage() {
                                     <button
                                       key={prod.id}
                                       type="button"
-                                      onClick={() => {
+                                      onMouseDown={(e) => {
+                                        e.preventDefault();
                                         updateItem(item.id, 'product_id', prod.id);
                                         updateItem(item.id, 'productSearchInput', '');
                                         updateItem(item.id, 'showProductSearch', false);
                                       }}
-                                      className="w-full text-left px-3 py-2 hover:bg-orange-50 dark:hover:bg-gray-600 border-b border-gray-100 dark:border-gray-600 last:border-b-0 text-sm"
+                                      className="w-full text-left px-3 py-2 hover:bg-orange-50 dark:hover:bg-gray-600 border-b border-gray-100 dark:border-gray-600 last:border-b-0 text-sm transition cursor-pointer"
                                     >
                                       <div className="font-semibold text-gray-900 dark:text-white">{prod.name}</div>
                                       <div className="text-xs text-gray-500 dark:text-gray-400">${prod.price.toFixed(2)}</div>
