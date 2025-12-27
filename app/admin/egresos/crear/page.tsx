@@ -210,16 +210,29 @@ export default function CreateExpensePage() {
           createdBy: user.id,
           posNumber: posNumber || undefined,
           category,
-          items: items.map((item) => ({
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price || 0,
-            purchase_price: item.purchase_price || 0,
-            subtotal: item.subtotal,
-          })),
-          subtotal,
+          items: items.map((item) => {
+            const qty = item.quantity || 0;
+            const price = item.purchase_price || 0;
+            const itemSubtotal = qty * price;
+            return {
+              description: item.description,
+              quantity: qty,
+              unit_price: item.unit_price || 0,
+              purchase_price: price,
+              subtotal: itemSubtotal,
+            };
+          }),
+          subtotal: items.reduce((sum, item) => {
+            const qty = item.quantity || 0;
+            const price = item.purchase_price || 0;
+            return sum + (qty * price);
+          }, 0),
           shippingCost: shippingCost || undefined,
-          total,
+          total: items.reduce((sum, item) => {
+            const qty = item.quantity || 0;
+            const price = item.purchase_price || 0;
+            return sum + (qty * price);
+          }, 0) + (shippingCost || 0),
           notes: notes || undefined,
           paymentStatus,
           checkDate: paymentStatus === 'unpaid' && checkDate ? checkDate : undefined,

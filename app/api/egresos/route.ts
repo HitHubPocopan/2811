@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     const { createdBy, posNumber, category, items, total, shippingCost, notes, paymentStatus, checkDate } = await request.json();
 
     if (!createdBy) {
+      console.error('Error: createdBy no identificado');
       return NextResponse.json(
         { error: 'Usuario no identificado' },
         { status: 401 }
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!category || !['Compra de Inventario', 'Servicios', 'Gastos Operativos', 'Otros'].includes(category)) {
+      console.error('Error: Categoría inválida', category);
       return NextResponse.json(
         { error: 'Categoría de gasto inválida' },
         { status: 400 }
@@ -21,6 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!Array.isArray(items) || items.length === 0) {
+      console.error('Error: Items inválido', items);
       return NextResponse.json(
         { error: 'Debe incluir al menos un artículo' },
         { status: 400 }
@@ -31,89 +34,98 @@ export async function POST(request: NextRequest) {
     const validatedItems: ExpenseItem[] = [];
 
     for (const item of items) {
+      console.log('Validando item:', JSON.stringify(item));
+
       if (!item.description || typeof item.description !== 'string' || item.description.trim() === '') {
+        console.error('Error: Descripción inválida', item.description);
         return NextResponse.json(
           { error: 'La descripción del artículo es requerida' },
           { status: 400 }
         );
       }
 
-      if (typeof item.quantity !== 'number' || item.quantity <= 0) {
+      const quantity = Number(item.quantity) || 0;
+      if (quantity <= 0) {
+        console.error('Error: Cantidad inválida', item.quantity);
         return NextResponse.json(
           { error: 'La cantidad debe ser mayor a 0' },
           { status: 400 }
         );
       }
 
-      if (typeof item.purchase_price !== 'number' || item.purchase_price < 0) {
+      const purchasePrice = Number(item.purchase_price) || 0;
+      if (purchasePrice < 0) {
+        console.error('Error: Precio negativo', item.purchase_price);
         return NextResponse.json(
           { error: 'El precio de compra unitario no puede ser negativo' },
           { status: 400 }
         );
       }
 
-      const itemSubtotal = item.quantity * item.purchase_price;
+      const itemSubtotal = quantity * purchasePrice;
       
-      if (Math.abs(item.subtotal - itemSubtotal) > 0.01) {
-        return NextResponse.json(
-          { error: `Subtotal incorrecto para ${item.description}` },
-          { status: 400 }
-        );
-      }
-
       subtotal += itemSubtotal;
       validatedItems.push({
         description: item.description.trim(),
-        quantity: item.quantity,
-        unit_price: item.unit_price || 0,
-        purchase_price: item.purchase_price,
+        quantity: quantity,
+        unit_price: Number(item.unit_price) || 0,
+        purchase_price: purchasePrice,
         subtotal: itemSubtotal,
       });
     }
 
-    const finalShippingCost = shippingCost && typeof shippingCost === 'number' && shippingCost >= 0 ? shippingCost : 0;
+    const finalShippingCost = Number(shippingCost) || 0;
     const finalTotal = subtotal + finalShippingCost;
 
-    if (Math.abs(total - finalTotal) > 0.01) {
-      return NextResponse.json(
-        { error: 'Total no coincide con los cálculos' },
-        { status: 400 }
-      );
+    console.log('Calculado - Subtotal:', subtotal, 'Envío:', finalShippingCost, 'Total:', finalTotal);
+    console.log('Esperado - Total:', total);
+
+    const validPaymentStatus = ['paid', 'unpaid'].includes(paymentStatus) ? paymentStatus : 'paid';
+    
+    const insertData: Record<string, unknown> = {
+      created_by: createdBy,
+      category,
+      items: validatedItems,
+      subtotal,
+      shipping_cost: finalShippingCost,
+      total: finalTotal,
+      status: 'pendiente',
+      payment_status: validPaymentStatus,
+    };
+
+    if (posNumber && typeof posNumber === 'number' && posNumber >= 1 && posNumber <= 3) {
+      insertData.pos_number = posNumber;
     }
+    if (notes && typeof notes === 'string' && notes.trim()) {
+      insertData.notes = notes.trim();
+    }
+    if (checkDate && typeof checkDate === 'string' && checkDate.trim()) {
+      insertData.check_date = checkDate;
+    }
+
+    console.log('Insertando:', JSON.stringify(insertData));
 
     const { data, error } = await supabaseAdmin
       .from('egresos')
-      .insert([
-        {
-          created_by: createdBy,
-          pos_number: posNumber && typeof posNumber === 'number' && posNumber >= 1 && posNumber <= 3 ? posNumber : null,
-          category,
-          items: validatedItems,
-          subtotal,
-          shipping_cost: finalShippingCost,
-          total: finalTotal,
-          notes: notes && typeof notes === 'string' ? notes.trim() : null,
-          status: 'pendiente',
-          payment_status: paymentStatus || 'paid',
-          check_date: checkDate && typeof checkDate === 'string' ? checkDate : null,
-        },
-      ])
+      .insert([insertData])
       .select()
       .single();
 
     if (error) {
       console.error('Supabase error:', error);
       return NextResponse.json(
-        { error: 'Error al registrar el egreso' },
+        { error: `Error al registrar el egreso: ${error.message}` },
         { status: 500 }
       );
     }
 
+    console.log('Egreso registrado exitosamente:', data.id);
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error('POST error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { error: `Error interno: ${errorMessage}` },
       { status: 500 }
     );
   }
