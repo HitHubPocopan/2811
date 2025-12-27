@@ -10,6 +10,8 @@ import { productService } from '@/lib/services/products';
 interface FormItem extends ExpenseItem {
   id: string;
   product_id?: string;
+  showProductSearch?: boolean;
+  productSearchInput?: string;
 }
 
 const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Servicios', 'Gastos Operativos', 'Otros'];
@@ -337,63 +339,92 @@ export default function CreateExpensePage() {
               </p>
             ) : (
               <div className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                          Producto del Catálogo
-                        </label>
-                        <select
-                          value={item.product_id || ''}
-                          onChange={(e) => updateItem(item.id, 'product_id', e.target.value || undefined)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
-                        >
-                          <option value="">Seleccionar producto...</option>
-                          {products.map((prod) => (
-                            <option key={prod.id} value={prod.id}>
-                              {prod.name} - ${prod.price.toFixed(2)}
-                            </option>
-                          ))}
-                        </select>
+                {items.map((item) => {
+                  const filteredProducts = item.productSearchInput
+                    ? products.filter((p) =>
+                        p.name.toLowerCase().includes(item.productSearchInput!.toLowerCase())
+                      )
+                    : [];
+
+                  return (
+                    <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="relative">
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Buscar Producto
+                          </label>
+                          {item.product_id ? (
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 px-3 py-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-600 rounded-lg text-sm text-blue-900 dark:text-blue-300 font-semibold">
+                                {products.find((p) => p.id === item.product_id)?.name || 'Producto'}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => updateItem(item.id, 'product_id', undefined)}
+                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap"
+                              >
+                                ✕ Cambiar
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <input
+                                type="text"
+                                value={item.productSearchInput || ''}
+                                onChange={(e) => updateItem(item.id, 'productSearchInput', e.target.value)}
+                                onFocus={() => updateItem(item.id, 'showProductSearch', true)}
+                                placeholder="Escribe para buscar..."
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
+                              />
+                              {item.showProductSearch && filteredProducts.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                                  {filteredProducts.map((prod) => (
+                                    <button
+                                      key={prod.id}
+                                      type="button"
+                                      onClick={() => {
+                                        updateItem(item.id, 'product_id', prod.id);
+                                        updateItem(item.id, 'productSearchInput', '');
+                                        updateItem(item.id, 'showProductSearch', false);
+                                      }}
+                                      className="w-full text-left px-3 py-2 hover:bg-orange-50 dark:hover:bg-gray-600 border-b border-gray-100 dark:border-gray-600 last:border-b-0 text-sm"
+                                    >
+                                      <div className="font-semibold text-gray-900 dark:text-white">{prod.name}</div>
+                                      <div className="text-xs text-gray-500 dark:text-gray-400">${prod.price.toFixed(2)}</div>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            O Descripción manual
+                          </label>
+                          <input
+                            type="text"
+                            value={item.description}
+                            onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                            placeholder="Ej: Café gourmet"
+                            disabled={!!item.product_id}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Cantidad
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                          O Descripción manual
-                        </label>
-                        <input
-                          type="text"
-                          value={item.description}
-                          onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                          placeholder="Ej: Café gourmet"
-                          disabled={!!item.product_id}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                          Cantidad
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          step="0.01"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
-                        />
-                      </div>
-                    </div>
-                    
-                    {item.product_id && (
-                      <button
-                        type="button"
-                        onClick={() => updateItem(item.id, 'product_id', undefined)}
-                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        ← Desseleccionar producto
-                      </button>
-                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
@@ -419,15 +450,16 @@ export default function CreateExpensePage() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => removeItem(item.id)}
-                      className="w-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900 px-3 py-2 rounded-lg font-semibold transition text-sm"
-                    >
-                      Eliminar Artículo
-                    </button>
-                  </div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.id)}
+                        className="w-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900 px-3 py-2 rounded-lg font-semibold transition text-sm"
+                      >
+                        Eliminar Artículo
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
