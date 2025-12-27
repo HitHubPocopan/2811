@@ -107,6 +107,8 @@ export interface Expense {
   total: number;
   notes?: string;
   status: 'pendiente' | 'aprobado' | 'rechazado';
+  payment_status: 'paid' | 'unpaid';
+  check_date?: string;
   created_at: string;
   updated_at: string;
 }

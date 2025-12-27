@@ -111,6 +111,21 @@ export default function ExpensesPage() {
     }
   };
 
+  const getPaymentStatusColor = (paymentStatus: string): string => {
+    switch (paymentStatus) {
+      case 'paid':
+        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
+      case 'unpaid':
+        return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
+      default:
+        return 'bg-gray-100 dark:bg-gray-700';
+    }
+  };
+
+  const getPaymentStatusLabel = (paymentStatus: string): string => {
+    return paymentStatus === 'paid' ? 'Pagado' : 'Sin Pagar';
+  };
+
   if (!user || user.role !== 'admin') {
     return null;
   }
@@ -209,10 +224,15 @@ export default function ExpensesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(expense.status)}`}>
-                      {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
-                    </span>
+                  <div className="mt-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(expense.status)}`}>
+                        {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
+                      </span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status)}`}>
+                        {getPaymentStatusLabel(expense.payment_status)}
+                      </span>
+                    </div>
                     <span className="text-gray-600 dark:text-gray-400 text-sm">
                       {expandedId === expense.id ? '▲' : '▼'}
                     </span>
@@ -255,6 +275,21 @@ export default function ExpensesPage() {
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-1 flex justify-between text-base font-bold">
                         <span className="text-gray-900 dark:text-white">Total:</span>
                         <span className="text-orange-600 dark:text-orange-400">${expense.total.toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    {/* Estado de Pago */}
+                    <div className="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700">
+                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Estado de Pago:</p>
+                      <div className="flex items-center gap-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status)}`}>
+                          {getPaymentStatusLabel(expense.payment_status)}
+                        </span>
+                        {expense.payment_status === 'unpaid' && expense.check_date && (
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Fecha límite: {new Date(expense.check_date).toLocaleDateString('es-AR')}
+                          </span>
+                        )}
                       </div>
                     </div>
 

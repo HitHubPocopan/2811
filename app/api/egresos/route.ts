@@ -4,7 +4,7 @@ import { ExpenseCategory, ExpenseItem } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
-    const { createdBy, posNumber, category, items, total, shippingCost, notes } = await request.json();
+    const { createdBy, posNumber, category, items, total, shippingCost, notes, paymentStatus, checkDate } = await request.json();
 
     if (!createdBy) {
       return NextResponse.json(
@@ -93,6 +93,8 @@ export async function POST(request: NextRequest) {
           total: finalTotal,
           notes: notes && typeof notes === 'string' ? notes.trim() : null,
           status: 'pendiente',
+          payment_status: paymentStatus || 'paid',
+          check_date: checkDate && typeof checkDate === 'string' ? checkDate : null,
         },
       ])
       .select()

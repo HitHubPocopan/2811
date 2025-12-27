@@ -26,7 +26,8 @@ export function Navbar() {
   const navItems = user.role === 'admin' 
     ? [
         { href: '/admin/dashboard', label: 'Dashboard' },
-        { href: '/admin/products', label: 'Productos' }
+        { href: '/admin/products', label: 'Productos' },
+        { href: '/admin/egresos', label: 'Gastos' }
       ]
     : [
         { href: '/pos/catalog', label: 'Catálogo' },

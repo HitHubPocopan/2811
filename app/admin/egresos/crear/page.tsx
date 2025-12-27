@@ -28,6 +28,8 @@ export default function CreateExpensePage() {
   const [posNumber, setPosNumber] = useState<number | null>(null);
   const [shippingCost, setShippingCost] = useState<number>(0);
   const [notes, setNotes] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid'>('paid');
+  const [checkDate, setCheckDate] = useState('');
   const [items, setItems] = useState<FormItem[]>([]);
 
   useEffect(() => {
@@ -107,6 +109,8 @@ export default function CreateExpensePage() {
           shippingCost: shippingCost || undefined,
           total,
           notes: notes || undefined,
+          paymentStatus,
+          checkDate: paymentStatus === 'unpaid' && checkDate ? checkDate : undefined,
         }),
       });
 
@@ -188,6 +192,53 @@ export default function CreateExpensePage() {
               ))}
             </select>
           </div>
+
+          {/* Estado de Pago */}
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Estado de Pago
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentStatus"
+                  value="paid"
+                  checked={paymentStatus === 'paid'}
+                  onChange={(e) => setPaymentStatus(e.target.value as 'paid' | 'unpaid')}
+                  className="w-4 h-4"
+                />
+                <span className="text-gray-700 dark:text-gray-300">Pagado</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="paymentStatus"
+                  value="unpaid"
+                  checked={paymentStatus === 'unpaid'}
+                  onChange={(e) => setPaymentStatus(e.target.value as 'paid' | 'unpaid')}
+                  className="w-4 h-4"
+                />
+                <span className="text-gray-700 dark:text-gray-300">Sin Pagar (Deuda)</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Fecha Límite de Cheque (solo si está sin pagar) */}
+          {paymentStatus === 'unpaid' && (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Fecha Límite de Cheque (Opcional)
+              </label>
+              <input
+                type="date"
+                value={checkDate}
+                onChange={(e) => setCheckDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Especifica la fecha límite si se espera cobro mediante cheque</p>
+            </div>
+          )}
 
           {/* Artículos */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
