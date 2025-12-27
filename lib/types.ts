@@ -86,3 +86,27 @@ export interface PurchaseRecord {
   created_at: string;
   updated_at: string;
 }
+
+export type ExpenseCategory = 'Compra de Inventario' | 'Servicios' | 'Gastos Operativos' | 'Otros';
+
+export interface ExpenseItem {
+  description: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+}
+
+export interface Expense {
+  id: string;
+  created_by: string;
+  pos_number?: number;
+  category: ExpenseCategory;
+  items: ExpenseItem[];
+  subtotal: number;
+  shipping_cost?: number;
+  total: number;
+  notes?: string;
+  status: 'pendiente' | 'aprobado' | 'rechazado';
+  created_at: string;
+  updated_at: string;
+}
