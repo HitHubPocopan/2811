@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ExpenseCategory, ExpenseItem } from '@/lib/types';
+import { ExpenseItem } from '@/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,14 +45,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (typeof item.unit_price !== 'number' || item.unit_price < 0) {
+      if (typeof item.purchase_price !== 'number' || item.purchase_price < 0) {
         return NextResponse.json(
-          { error: 'El precio unitario no puede ser negativo' },
+          { error: 'El precio de compra unitario no puede ser negativo' },
           { status: 400 }
         );
       }
 
-      const itemSubtotal = item.quantity * item.unit_price;
+      const itemSubtotal = item.quantity * item.purchase_price;
       
       if (Math.abs(item.subtotal - itemSubtotal) > 0.01) {
         return NextResponse.json(
@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
       validatedItems.push({
         description: item.description.trim(),
         quantity: item.quantity,
-        unit_price: item.unit_price,
+        unit_price: item.unit_price || 0,
+        purchase_price: item.purchase_price,
         subtotal: itemSubtotal,
       });
     }

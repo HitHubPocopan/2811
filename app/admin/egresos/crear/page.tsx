@@ -11,6 +11,8 @@ interface FormItem extends ExpenseItem {
   id: string;
   product_id?: string;
   productSearchInput?: string;
+  selling_price?: number;
+  confirmed?: boolean;
 }
 
 const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Servicios', 'Gastos Operativos', 'Otros'];
@@ -107,6 +109,7 @@ export default function CreateExpensePage() {
         description: '',
         quantity: 1,
         unit_price: 0,
+        purchase_price: 0,
         subtotal: 0,
         product_id: undefined,
       },
@@ -117,10 +120,18 @@ export default function CreateExpensePage() {
     setItems(items.filter((item) => item.id !== id));
   };
 
-  const updateItem = (id: string, field: string, value: any) => {
+  const confirmItem = (id: string) => {
+    setItems(
+      items.map((item) =>
+        item.id === id ? { ...item, confirmed: true } : item
+      )
+    );
+  };
+
+  const updateItem = (id: string, field: string, value: string | number | undefined) => {
     setItems(
       items.map((item) => {
-        if (item.id === id) {
+        if (item.id === id && !item.confirmed) {
           const updated = { ...item, [field]: value };
           
           if (field === 'product_id') {
@@ -128,10 +139,11 @@ export default function CreateExpensePage() {
             if (selectedProduct) {
               updated.description = selectedProduct.name;
               updated.unit_price = selectedProduct.price;
-              updated.subtotal = updated.quantity * selectedProduct.price;
+              updated.purchase_price = selectedProduct.price;
+              updated.subtotal = updated.quantity * updated.purchase_price;
             }
-          } else if (field === 'quantity' || field === 'unit_price') {
-            updated.subtotal = updated.quantity * updated.unit_price;
+          } else if (field === 'quantity' || field === 'purchase_price') {
+            updated.subtotal = updated.quantity * updated.purchase_price;
           }
           
           return updated;
@@ -146,12 +158,15 @@ export default function CreateExpensePage() {
     setItems(
       items.map((item) => {
         if (item.id === itemId) {
+          const sellingPrice = selectedProduct?.price || 0;
           return {
             ...item,
             product_id: productId,
             description: selectedProduct?.name || '',
-            unit_price: selectedProduct?.price || 0,
-            subtotal: item.quantity * (selectedProduct?.price || 0),
+            unit_price: sellingPrice,
+            selling_price: sellingPrice,
+            purchase_price: sellingPrice,
+            subtotal: item.quantity * sellingPrice,
             productSearchInput: '',
           };
         }
@@ -180,7 +195,7 @@ export default function CreateExpensePage() {
       return;
     }
 
-    if (items.some((item) => !item.description.trim() || item.quantity <= 0 || item.unit_price < 0)) {
+    if (items.some((item) => !item.description.trim() || item.quantity <= 0 || item.purchase_price < 0)) {
       setError('Por favor, completa todos los campos correctamente');
       return;
     }
@@ -195,7 +210,7 @@ export default function CreateExpensePage() {
           createdBy: user.id,
           posNumber: posNumber || undefined,
           category,
-          items: items.map(({ id, ...rest }) => rest),
+          items: items.map(({ id: _, ...rest }) => rest),
           subtotal,
           shippingCost: shippingCost || undefined,
           total,
@@ -355,7 +370,7 @@ export default function CreateExpensePage() {
 
             {items.length === 0 ? (
               <p className="text-gray-600 dark:text-gray-400 text-center py-8">
-                Haz clic en "Agregar Artículo" para comenzar
+                Haz clic en &quot;Agregar Artículo&quot; para comenzar
               </p>
             ) : (
               <div className="space-y-4">
@@ -392,10 +407,11 @@ export default function CreateExpensePage() {
                                 type="text"
                                 value={item.productSearchInput || ''}
                                 onChange={(e) => updateItem(item.id, 'productSearchInput', e.target.value)}
-                                onFocus={() => setOpenSearchDropdownId(item.id)}
+                                onFocus={() => !item.confirmed && setOpenSearchDropdownId(item.id)}
                                 onBlur={() => setTimeout(() => setOpenSearchDropdownId(null), 150)}
                                 placeholder="Escribe para buscar..."
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
+                                disabled={item.confirmed}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
                               />
                               {openSearchDropdownId === item.id && filteredProducts.length > 0 && (
                                 <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
@@ -427,7 +443,7 @@ export default function CreateExpensePage() {
                             value={item.description}
                             onChange={(e) => updateItem(item.id, 'description', e.target.value)}
                             placeholder="Ej: Café gourmet"
-                            disabled={!!item.product_id}
+                            disabled={!!item.product_id || item.confirmed}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
                           />
                         </div>
@@ -441,23 +457,33 @@ export default function CreateExpensePage() {
                             step="0.01"
                             value={item.quantity}
                             onChange={(e) => updateItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
+                            disabled={item.confirmed}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
                           />
                         </div>
                       </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                          Valor Unitario ($)
+                          Precio de Venta ($)
+                        </label>
+                        <div className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-900 dark:text-white">
+                          {item.unit_price?.toFixed(2) || '0.00'}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                          Precio de Compra Unitario ($)
                         </label>
                         <input
                           type="number"
                           min="0"
                           step="0.01"
-                          value={item.unit_price}
-                          onChange={(e) => updateItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm"
+                          value={item.purchase_price}
+                          onChange={(e) => updateItem(item.id, 'purchase_price', parseFloat(e.target.value) || 0)}
+                          disabled={item.confirmed}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white text-sm disabled:opacity-50 disabled:bg-gray-100 dark:disabled:bg-gray-900"
                         />
                       </div>
                       <div>
@@ -470,13 +496,32 @@ export default function CreateExpensePage() {
                       </div>
                     </div>
 
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.id)}
-                        className="w-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900 px-3 py-2 rounded-lg font-semibold transition text-sm"
-                      >
-                        Eliminar Artículo
-                      </button>
+                      <div className="flex gap-2">
+                        {item.confirmed ? (
+                          <button
+                            type="button"
+                            disabled
+                            className="flex-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-3 py-2 rounded-lg font-semibold text-sm opacity-75"
+                          >
+                            ✓ Artículo Confirmado
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => confirmItem(item.id)}
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg font-semibold transition text-sm"
+                          >
+                            Confirmar Artículo
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.id)}
+                          className="flex-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900 px-3 py-2 rounded-lg font-semibold transition text-sm"
+                        >
+                          Eliminar Artículo
+                        </button>
+                      </div>
                     </div>
                   );
                 })}

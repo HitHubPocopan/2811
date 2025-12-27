@@ -93,6 +93,7 @@ export interface ExpenseItem {
   description: string;
   quantity: number;
   unit_price: number;
+  purchase_price: number;
   subtotal: number;
 }
 
