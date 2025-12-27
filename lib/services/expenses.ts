@@ -168,16 +168,20 @@ export const expenseService = {
       if (error) {
         return {
           'Compra de Inventario': 0,
-          'Servicios': 0,
-          'Gastos Operativos': 0,
+          'Expensas': 0,
+          'Luz': 0,
+          'Internet': 0,
+          'Agua': 0,
           'Otros': 0,
         };
       }
 
       const result: Record<ExpenseCategory, number> = {
         'Compra de Inventario': 0,
-        'Servicios': 0,
-        'Gastos Operativos': 0,
+        'Expensas': 0,
+        'Luz': 0,
+        'Internet': 0,
+        'Agua': 0,
         'Otros': 0,
       };
 
@@ -195,8 +199,10 @@ export const expenseService = {
     } catch {
       return {
         'Compra de Inventario': 0,
-        'Servicios': 0,
-        'Gastos Operativos': 0,
+        'Expensas': 0,
+        'Luz': 0,
+        'Internet': 0,
+        'Agua': 0,
         'Otros': 0,
       };
     }

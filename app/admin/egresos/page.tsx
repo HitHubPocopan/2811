@@ -7,7 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
 import { Expense, ExpenseCategory } from '@/lib/types';
 
-const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Servicios', 'Gastos Operativos', 'Otros'];
+const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Expensas', 'Luz', 'Internet', 'Agua', 'Otros'];
 const STATUS_OPTIONS = ['pendiente', 'aprobado', 'rechazado'] as const;
 const POS_OPTIONS = [
   { id: 1, name: 'Costa del Este' },
@@ -87,10 +87,14 @@ export default function ExpensesPage() {
     switch (category) {
       case 'Compra de Inventario':
         return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300';
-      case 'Servicios':
+      case 'Expensas':
         return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300';
-      case 'Gastos Operativos':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
+      case 'Luz':
+        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300';
+      case 'Internet':
+        return 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300';
+      case 'Agua':
+        return 'bg-blue-200 dark:bg-blue-900/40 text-blue-900 dark:text-blue-200';
       case 'Otros':
         return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
       default:

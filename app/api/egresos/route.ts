@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!category || !['Compra de Inventario', 'Servicios', 'Gastos Operativos', 'Otros'].includes(category)) {
+    if (!category || !['Compra de Inventario', 'Expensas', 'Luz', 'Internet', 'Agua', 'Otros'].includes(category)) {
       console.error('Error: Categoría inválida', category);
       return NextResponse.json(
         { error: 'Categoría de gasto inválida' },

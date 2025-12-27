@@ -15,7 +15,7 @@ interface FormItem extends ExpenseItem {
   confirmed?: boolean;
 }
 
-const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Servicios', 'Gastos Operativos', 'Otros'];
+const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Expensas', 'Luz', 'Internet', 'Agua', 'Otros'];
 const POS_OPTIONS = [
   { id: 1, name: 'Costa del Este' },
   { id: 2, name: 'Mar de las Pampas' },
@@ -49,6 +49,9 @@ export default function CreateExpensePage() {
   const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid'>('paid');
   const [checkDate, setCheckDate] = useState('');
   const [items, setItems] = useState<FormItem[]>([]);
+
+  const [simpleExpenseAmount, setSimpleExpenseAmount] = useState<number>(0);
+  const [simpleExpenseDescription, setSimpleExpenseDescription] = useState('');
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
@@ -190,23 +193,32 @@ export default function CreateExpensePage() {
 
     if (!user) return;
 
-    if (items.length === 0) {
-      setError('Debe agregar al menos un artículo');
-      return;
-    }
+    const isInventoryPurchase = category === 'Compra de Inventario';
 
-    if (items.some((item) => !item.description.trim() || item.quantity <= 0)) {
-      setError('Por favor, completa descripción y cantidad correctamente');
-      return;
+    if (isInventoryPurchase) {
+      if (items.length === 0) {
+        setError('Debe agregar al menos un artículo');
+        return;
+      }
+
+      if (items.some((item) => !item.description.trim() || item.quantity <= 0)) {
+        setError('Por favor, completa descripción y cantidad correctamente');
+        return;
+      }
+    } else {
+      if (simpleExpenseAmount <= 0) {
+        setError('El monto del gasto debe ser mayor a 0');
+        return;
+      }
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('/api/egresos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      let payload;
+
+      if (isInventoryPurchase) {
+        payload = {
           createdBy: user.id,
           posNumber: posNumber || undefined,
           category,
@@ -236,7 +248,31 @@ export default function CreateExpensePage() {
           notes: notes || undefined,
           paymentStatus,
           checkDate: paymentStatus === 'unpaid' && checkDate ? checkDate : undefined,
-        }),
+        };
+      } else {
+        payload = {
+          createdBy: user.id,
+          category,
+          items: [
+            {
+              description: simpleExpenseDescription || category,
+              quantity: 1,
+              unit_price: simpleExpenseAmount,
+              purchase_price: simpleExpenseAmount,
+              subtotal: simpleExpenseAmount,
+            },
+          ],
+          subtotal: simpleExpenseAmount,
+          total: simpleExpenseAmount,
+          paymentStatus,
+          checkDate: paymentStatus === 'unpaid' && checkDate ? checkDate : undefined,
+        };
+      }
+
+      const response = await fetch('/api/egresos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -288,7 +324,12 @@ export default function CreateExpensePage() {
             </label>
             <select
               value={category}
-              onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+              onChange={(e) => {
+                setCategory(e.target.value as ExpenseCategory);
+                setItems([]);
+                setSimpleExpenseAmount(0);
+                setSimpleExpenseDescription('');
+              }}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
             >
               {CATEGORIES.map((cat) => (
@@ -365,27 +406,28 @@ export default function CreateExpensePage() {
             </div>
           )}
 
-          {/* Artículos */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Artículos</h2>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={addItem}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
-                >
-                  + Agregar Artículo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowNewProductModal(true)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
-                >
-                  + Producto Nuevo
-                </button>
+          {/* Artículos o Monto Simple según categoría */}
+          {category === 'Compra de Inventario' ? (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <div className="flex justify-between items-center mb-4 gap-2 flex-wrap">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Artículos</h2>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={addItem}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                  >
+                    + Agregar Artículo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowNewProductModal(true)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                  >
+                    + Producto Nuevo
+                  </button>
+                </div>
               </div>
-            </div>
 
             {items.length === 0 ? (
               <p className="text-gray-600 dark:text-gray-400 text-center py-8">
@@ -548,23 +590,60 @@ export default function CreateExpensePage() {
                 })}
               </div>
             )}
-          </div>
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Detalles del Gasto</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Monto del Gasto ($) *
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={simpleExpenseAmount || ''}
+                    onChange={(e) => setSimpleExpenseAmount(e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)}
+                    placeholder="0.00"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
 
-          {/* Costo de Envío */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Costo de Envío (Opcional)
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={shippingCost}
-              onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
-              placeholder="0.00"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Descripción (Opcional)
+                  </label>
+                  <textarea
+                    value={simpleExpenseDescription}
+                    onChange={(e) => setSimpleExpenseDescription(e.target.value)}
+                    placeholder={`Ej: ${category}`}
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Costo de Envío - Solo para Compra de Inventario */}
+          {category === 'Compra de Inventario' && (
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                Costo de Envío (Opcional)
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={shippingCost}
+                onChange={(e) => setShippingCost(parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+          )}
 
           {/* Notas */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
@@ -583,18 +662,27 @@ export default function CreateExpensePage() {
           {/* Resumen */}
           <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-lg border border-orange-200 dark:border-orange-700">
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-700 dark:text-gray-300">Subtotal:</span>
-                <span className="font-semibold text-gray-900 dark:text-white">${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-700 dark:text-gray-300">Costo de Envío:</span>
-                <span className="font-semibold text-gray-900 dark:text-white">${shippingCost.toFixed(2)}</span>
-              </div>
-              <div className="border-t border-orange-300 dark:border-orange-600 pt-2 flex justify-between text-lg">
-                <span className="font-bold text-gray-900 dark:text-white">Total:</span>
-                <span className="font-bold text-orange-600 dark:text-orange-400">${total.toFixed(2)}</span>
-              </div>
+              {category === 'Compra de Inventario' ? (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-700 dark:text-gray-300">Subtotal:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-700 dark:text-gray-300">Costo de Envío:</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">${shippingCost.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-orange-300 dark:border-orange-600 pt-2 flex justify-between text-lg">
+                    <span className="font-bold text-gray-900 dark:text-white">Total:</span>
+                    <span className="font-bold text-orange-600 dark:text-orange-400">${total.toFixed(2)}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between text-lg">
+                  <span className="font-bold text-gray-900 dark:text-white">Monto Total:</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400">${simpleExpenseAmount.toFixed(2)}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -609,7 +697,7 @@ export default function CreateExpensePage() {
             </button>
             <button
               type="submit"
-              disabled={loading || items.length === 0}
+              disabled={loading || (category === 'Compra de Inventario' && items.length === 0)}
               className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-bold transition"
             >
               {loading ? 'Registrando...' : 'Registrar Compra'}

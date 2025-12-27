@@ -87,7 +87,7 @@ export interface PurchaseRecord {
   updated_at: string;
 }
 
-export type ExpenseCategory = 'Compra de Inventario' | 'Servicios' | 'Gastos Operativos' | 'Otros';
+export type ExpenseCategory = 'Compra de Inventario' | 'Expensas' | 'Luz' | 'Internet' | 'Agua' | 'Otros';
 
 export interface ExpenseItem {
   description: string;
