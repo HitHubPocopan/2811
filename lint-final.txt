@@ -1,0 +1,66 @@
+
+> 2811@0.1.0 lint
+> eslint
+
+
+c:\Users\54225\Desktop\2811\app\admin\dashboard\page.tsx
+  84:5  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+c:\Users\54225\Desktop\2811\app\admin\dashboard\page.tsx:84:5
+  82 |     }
+  83 |
+> 84 |     fetchStats();
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  85 |   }, [user, router]);
+  86 |
+  87 |   const handleRefresh = async () => {  react-hooks/set-state-in-effect
+  85:6  warning  React Hook useEffect has a missing dependency: 'fetchStats'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/exhaustive-deps
+
+c:\Users\54225\Desktop\2811\app\admin\egresos\page.tsx
+  36:6  warning  React Hook useEffect has a missing dependency: 'fetchExpenses'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+c:\Users\54225\Desktop\2811\app\admin\products\page.tsx
+  150:22  warning  'successCount' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+c:\Users\54225\Desktop\2811\app\pos\catalog\page.tsx
+   37:35  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  237:27  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+c:\Users\54225\Desktop\2811\hash-passwords.js
+  1:16  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+c:\Users\54225\Desktop\2811\lib\services\import-export.ts
+    3:8   warning  'html2canvas' is defined but never used                 @typescript-eslint/no-unused-vars
+    5:10  warning  'salesService' is defined but never used                @typescript-eslint/no-unused-vars
+   18:47  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   29:18  warning  'error' is defined but never used                       @typescript-eslint/no-unused-vars
+   63:44  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   63:59  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   63:79  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  104:31  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  105:35  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  123:11  warning  'getAllTopProducts' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  126:31  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  127:35  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  172:91  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  248:16  error    'posNum' is never reassigned. Use 'const' instead       prefer-const
+  274:36  error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+
+c:\Users\54225\Desktop\2811\lib\services\sales.ts
+  210:11  error  'startOfDay' is never reassigned. Use 'const' instead  prefer-const
+  242:11  error  'startOfDay' is never reassigned. Use 'const' instead  prefer-const
+  291:13  error  'dayStart' is never reassigned. Use 'const' instead    prefer-const
+  349:13  error  'dayStart' is never reassigned. Use 'const' instead    prefer-const
+
+c:\Users\54225\Desktop\2811\test-hash.js
+  1:16  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+✖ 27 problems (19 errors, 8 warnings)
+  5 errors and 0 warnings potentially fixable with the `--fix` option.
+

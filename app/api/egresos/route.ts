@@ -138,11 +138,16 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const status = searchParams.get('status') as 'pendiente' | 'aprobado' | 'rechazado' | null;
     const category = searchParams.get('category');
     const posNumber = searchParams.get('posNumber');
 
     let query = supabaseAdmin.from('egresos').select('*');
+
+    if (id) {
+      query = query.eq('id', id);
+    }
 
     if (status) {
       query = query.eq('status', status);
@@ -163,6 +168,10 @@ export async function GET(request: NextRequest) {
         { error: 'Error al obtener egresos' },
         { status: 500 }
       );
+    }
+
+    if (id) {
+      return NextResponse.json(data?.[0] || null);
     }
 
     return NextResponse.json(data || []);
@@ -224,6 +233,7 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json();
     const updateData: Record<string, unknown> = {};
+    updateData.updated_at = new Date().toISOString();
 
     if ('status' in body) {
       updateData.status = body.status;
@@ -231,8 +241,32 @@ export async function PATCH(request: NextRequest) {
     if ('payment_status' in body) {
       updateData.payment_status = body.payment_status;
     }
+    if ('check_date' in body) {
+      updateData.check_date = body.check_date || null;
+    }
+    if ('category' in body) {
+      updateData.category = body.category;
+    }
+    if ('items' in body && Array.isArray(body.items)) {
+      updateData.items = body.items;
+    }
+    if ('subtotal' in body) {
+      updateData.subtotal = body.subtotal;
+    }
+    if ('shipping_cost' in body) {
+      updateData.shipping_cost = body.shipping_cost;
+    }
+    if ('total' in body) {
+      updateData.total = body.total;
+    }
+    if ('notes' in body) {
+      updateData.notes = body.notes || null;
+    }
+    if ('pos_number' in body) {
+      updateData.pos_number = body.pos_number || null;
+    }
 
-    if (Object.keys(updateData).length === 0) {
+    if (Object.keys(updateData).length === 1) {
       return NextResponse.json(
         { error: 'No hay datos para actualizar' },
         { status: 400 }
