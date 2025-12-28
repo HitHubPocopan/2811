@@ -57,7 +57,7 @@ export default function ExpensesPage() {
   const handleStatusUpdate = async (expenseId: string, newStatus: string) => {
     setUpdatingId(expenseId);
     try {
-      const response = await fetch(`/api/egresos?id=${expenseId}`, {
+      const response = await fetch(`/api/egresos/${expenseId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -84,7 +84,7 @@ export default function ExpensesPage() {
 
     setUpdatingId(expenseId);
     try {
-      const response = await fetch(`/api/egresos?id=${expenseId}`, {
+      const response = await fetch(`/api/egresos/${expenseId}`, {
         method: 'DELETE',
       });
 
@@ -102,13 +102,57 @@ export default function ExpensesPage() {
     }
   };
 
+  const handleToggleCheckPayment = async (expenseId: string, currentStatus: string, checkDate?: string) => {
+    setUpdatingId(expenseId);
+    try {
+      let newPaymentStatus: 'paid' | 'unpaid' = 'paid';
+      let newCheckDate: string | null = null;
+
+      if (currentStatus === 'paid') {
+        newPaymentStatus = 'unpaid';
+        if (checkDate) {
+          newCheckDate = checkDate;
+        }
+      } else {
+        newPaymentStatus = 'paid';
+      }
+
+      const response = await fetch(`/api/egresos/${expenseId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          payment_status: newPaymentStatus,
+          check_date: newCheckDate,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedExpense = await response.json();
+        setExpenses(
+          expenses.map((exp) =>
+            exp.id === expenseId
+              ? { ...exp, payment_status: updatedExpense.payment_status, check_date: updatedExpense.check_date }
+              : exp
+          )
+        );
+      } else {
+        alert('Error al actualizar el estado de pago');
+      }
+    } catch (error) {
+      console.error('Error toggling check payment:', error);
+      alert('Error al actualizar el estado de pago');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const getPosName = (posNumber?: number): string => {
     if (!posNumber) return 'General';
     const pos = POS_OPTIONS.find((p) => p.id === posNumber);
     return pos?.name || `POS ${posNumber}`;
   };
 
-  const getCategoryColor = (category: ExpenseCategory): string => {
+  const getCategoryColor = (category?: ExpenseCategory): string => {
     switch (category) {
       case 'Compra de Inventario':
         return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300';
@@ -140,19 +184,34 @@ export default function ExpensesPage() {
     }
   };
 
-  const getPaymentStatusColor = (paymentStatus: string): string => {
-    switch (paymentStatus) {
-      case 'paid':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
-      case 'unpaid':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
-      default:
-        return 'bg-gray-100 dark:bg-gray-700';
+  const getPaymentStatusColor = (paymentStatus: string, checkDate?: string): string => {
+    if (paymentStatus === 'paid') {
+      return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
     }
+    if (paymentStatus === 'unpaid' && checkDate) {
+      const checkDateObj = new Date(checkDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      checkDateObj.setHours(0, 0, 0, 0);
+      if (checkDateObj > today) {
+        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300';
+      }
+    }
+    return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
   };
 
-  const getPaymentStatusLabel = (paymentStatus: string): string => {
-    return paymentStatus === 'paid' ? 'Pagado' : 'Sin Pagar';
+  const getPaymentStatusLabel = (paymentStatus: string, checkDate?: string): string => {
+    if (paymentStatus === 'paid') return 'Pagado';
+    if (paymentStatus === 'unpaid' && checkDate) {
+      const checkDateObj = new Date(checkDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      checkDateObj.setHours(0, 0, 0, 0);
+      if (checkDateObj > today) {
+        return 'Cheque Pendiente';
+      }
+    }
+    return 'Sin Pagar';
   };
 
   if (!user || user.role !== 'admin') {
@@ -258,8 +317,8 @@ export default function ExpensesPage() {
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(expense.status)}`}>
                         {expense.status.charAt(0).toUpperCase() + expense.status.slice(1)}
                       </span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status)}`}>
-                        {getPaymentStatusLabel(expense.payment_status)}
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status, expense.check_date)}`}>
+                        {getPaymentStatusLabel(expense.payment_status, expense.check_date)}
                       </span>
                     </div>
                     <span className="text-gray-600 dark:text-gray-400 text-sm">
@@ -310,15 +369,26 @@ export default function ExpensesPage() {
                     {/* Estado de Pago */}
                     <div className="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700">
                       <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Estado de Pago:</p>
-                      <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status)}`}>
-                          {getPaymentStatusLabel(expense.payment_status)}
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status, expense.check_date)}`}>
+                          {getPaymentStatusLabel(expense.payment_status, expense.check_date)}
                         </span>
                         {expense.payment_status === 'unpaid' && expense.check_date && (
                           <span className="text-xs text-gray-600 dark:text-gray-400">
                             Fecha límite: {new Date(expense.check_date).toLocaleDateString('es-AR')}
                           </span>
                         )}
+                        <button
+                          onClick={() => handleToggleCheckPayment(expense.id, expense.payment_status, expense.check_date)}
+                          disabled={updatingId === expense.id}
+                          className={`px-3 py-1 rounded text-xs font-semibold transition ${
+                            expense.payment_status === 'paid'
+                              ? 'bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
+                              : 'bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300'
+                          } disabled:opacity-50`}
+                        >
+                          {expense.payment_status === 'paid' ? '↺ Marcar Pendiente' : '✓ Marcar Pagado'}
+                        </button>
                       </div>
                     </div>
 

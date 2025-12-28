@@ -138,9 +138,27 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const status = searchParams.get('status') as 'pendiente' | 'aprobado' | 'rechazado' | null;
     const category = searchParams.get('category');
     const posNumber = searchParams.get('posNumber');
+
+    if (id) {
+      const { data, error } = await supabaseAdmin
+        .from('egresos')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        return NextResponse.json(
+          { error: 'Egreso no encontrado' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(data);
+    }
 
     let query = supabaseAdmin.from('egresos').select('*');
 

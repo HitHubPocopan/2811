@@ -101,7 +101,7 @@ export interface Expense {
   id: string;
   created_by: string;
   pos_number?: number;
-  category: ExpenseCategory;
+  category?: ExpenseCategory;
   items: ExpenseItem[];
   subtotal: number;
   shipping_cost?: number;
