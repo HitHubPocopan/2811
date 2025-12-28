@@ -117,6 +117,15 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Supabase error:', error);
+      
+      // Error de restricción de categoría (check constraint)
+      if (error.message.includes('egresos_category_check')) {
+        return NextResponse.json(
+          { error: 'Error: La base de datos no reconoce la categoría seleccionada. Por favor, asegúrese de haber ejecutado el script de migración SQL para actualizar las categorías de egresos.' },
+          { status: 500 }
+        );
+      }
+
       return NextResponse.json(
         { error: `Error al registrar el egreso: ${error.message}` },
         { status: 500 }
