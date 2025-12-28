@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
-import { Expense, ExpenseCategory, ExpenseItem } from '@/lib/types';
+import { Expense, ExpenseCategory } from '@/lib/types';
 
 const CATEGORIES: ExpenseCategory[] = ['Compra de Inventario', 'Expensas', 'Luz', 'Internet', 'Agua', 'Otros'];
 const STATUS_OPTIONS = ['pendiente', 'aprobado', 'rechazado'] as const;
@@ -66,7 +66,7 @@ export default function ExpensesPage() {
       if (response.ok) {
         setExpenses(
           expenses.map((exp) =>
-            exp.id === expenseId ? { ...exp, status: newStatus as 'pendiente' | 'aprobado' | 'rechazado' } : exp
+            exp.id === expenseId ? { ...exp, status: newStatus as any } : exp
           )
         );
       }
@@ -153,15 +153,6 @@ export default function ExpensesPage() {
 
   const getPaymentStatusLabel = (paymentStatus: string): string => {
     return paymentStatus === 'paid' ? 'Pagado' : 'Sin Pagar';
-  };
-
-  const isCheckPending = (expense: Expense): boolean => {
-    if (expense.payment_status !== 'unpaid' || !expense.check_date) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const checkDate = new Date(expense.check_date);
-    checkDate.setHours(0, 0, 0, 0);
-    return checkDate > today;
   };
 
   if (!user || user.role !== 'admin') {
@@ -284,7 +275,7 @@ export default function ExpensesPage() {
                     <div>
                       <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Artículos</h3>
                       <div className="space-y-2">
-                        {expense.items.map((item: ExpenseItem, idx: number) => (
+                        {expense.items.map((item, idx) => (
                           <div key={idx} className="flex justify-between text-sm bg-white dark:bg-gray-800 p-3 rounded">
                             <div>
                               <p className="font-semibold text-gray-900 dark:text-white">{item.description}</p>
@@ -320,18 +311,12 @@ export default function ExpensesPage() {
                     <div className="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700">
                       <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Estado de Pago:</p>
                       <div className="flex items-center gap-3">
-                        {isCheckPending(expense) ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                            Cheque Pendiente
-                          </span>
-                        ) : (
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status)}`}>
-                            {getPaymentStatusLabel(expense.payment_status)}
-                          </span>
-                        )}
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPaymentStatusColor(expense.payment_status)}`}>
+                          {getPaymentStatusLabel(expense.payment_status)}
+                        </span>
                         {expense.payment_status === 'unpaid' && expense.check_date && (
                           <span className="text-xs text-gray-600 dark:text-gray-400">
-                            Fecha: {new Date(expense.check_date).toLocaleDateString('es-AR')}
+                            Fecha límite: {new Date(expense.check_date).toLocaleDateString('es-AR')}
                           </span>
                         )}
                       </div>
