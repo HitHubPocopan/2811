@@ -45,6 +45,26 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if ('check_date' in body) {
       updateData.check_date = body.check_date;
     }
+    if ('category' in body) {
+      updateData.category = body.category;
+    }
+    if ('items' in body) {
+      updateData.items = body.items;
+    }
+    if ('subtotal' in body) {
+      updateData.subtotal = body.subtotal;
+    }
+    if ('shipping_cost' in body) {
+      updateData.shipping_cost = body.shipping_cost;
+    }
+    if ('total' in body) {
+      updateData.total = body.total;
+    }
+    if ('notes' in body) {
+      updateData.notes = body.notes;
+    }
+
+    updateData.updated_at = new Date().toISOString();
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
