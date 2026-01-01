@@ -66,9 +66,12 @@ export default function CheckoutPage() {
     setError('');
 
     const saleItems: SaleItem[] = items.map((item) => {
+      // Intentar obtener el nombre del item guardado, o buscarlo en la lista cargada como respaldo
+      const productName = item.product_name || products.find(p => p.id === item.product_id)?.name || 'Producto desconocido';
+      
       return {
         product_id: item.product_id,
-        product_name: item.product_name || 'Producto desconocido',
+        product_name: productName,
         quantity: item.quantity,
         unit_price: item.price,
         subtotal: item.price * item.quantity,

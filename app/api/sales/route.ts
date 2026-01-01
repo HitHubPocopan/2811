@@ -61,10 +61,10 @@ export async function POST(request: NextRequest) {
       .select('id, name')
       .in('id', items.map((item) => item.product_id));
 
-    if (!products || products.length !== items.length) {
-      const productIds = items.map((item) => item.product_id);
+    const uniqueItemIds = [...new Set(items.map(item => item.product_id))];
+    if (!products || products.length !== uniqueItemIds.length) {
       const foundIds = products?.map((p) => p.id) || [];
-      const missingIds = productIds.filter((id) => !foundIds.includes(id));
+      const missingIds = uniqueItemIds.filter((id) => !foundIds.includes(id));
       
       return NextResponse.json(
         { error: `Productos no encontrados en la base de datos: ${missingIds.join(', ')}` },

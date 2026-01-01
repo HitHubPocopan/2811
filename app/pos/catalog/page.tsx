@@ -239,6 +239,9 @@ export default function CatalogPage() {
                             src={product.image_url}
                             alt={product.name}
                             className="w-full h-24 object-cover rounded mb-2"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Sin+Imagen';
+                            }}
                           />
                         )}
                         <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
