@@ -12,6 +12,7 @@ export default function CheckoutPage() {
   const { user } = useAuthStore();
   const { items, getTotal, clearCart } = useCartStore();
   const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -33,8 +34,10 @@ export default function CheckoutPage() {
     }
 
     const fetchProducts = async () => {
+      setLoadingProducts(true);
       const data = await productService.getAll();
       setProducts(data);
+      setLoadingProducts(false);
     };
 
     fetchProducts();
@@ -42,6 +45,10 @@ export default function CheckoutPage() {
 
   const handleCompleteSale = async () => {
     if (!user || user.role !== 'pos') return;
+    if (loadingProducts) {
+      setError('Cargando información de productos. Por favor espera...');
+      return;
+    }
     if (!paymentMethod) {
       setError('Por favor selecciona un método de pago.');
       return;
@@ -59,10 +66,9 @@ export default function CheckoutPage() {
     setError('');
 
     const saleItems: SaleItem[] = items.map((item) => {
-      const product = products.find((p) => p.id === item.product_id);
       return {
         product_id: item.product_id,
-        product_name: product?.name || 'Producto desconocido',
+        product_name: item.product_name || 'Producto desconocido',
         quantity: item.quantity,
         unit_price: item.price,
         subtotal: item.price * item.quantity,
@@ -130,11 +136,10 @@ export default function CheckoutPage() {
           <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Resumen de venta</h2>
           <div className="space-y-3">
             {items.map((item) => {
-              const product = products.find((p) => p.id === item.product_id);
               return (
                 <div key={item.product_id} className="flex justify-between pb-3 border-b">
                   <div>
-                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">{product?.name}</p>
+                    <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">{item.product_name || 'Producto desconocido'}</p>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       ${item.price.toFixed(2)} x {item.quantity}
                     </p>

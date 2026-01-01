@@ -7,23 +7,10 @@ import { useMemo } from 'react';
 export function Cart({ products }: { products: Product[] }) {
   const { items, removeItem, updateQuantity, clearCart } = useCartStore();
 
-  // Create a product map for faster lookups
-  const productMap = useMemo(() => 
-    products.reduce((acc, product) => {
-      acc[product.id] = product;
-      return acc;
-    }, {} as Record<string, Product>),
-    [products]
-  );
-
   const total = useMemo(() => 
     items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items]
   );
-
-  const getProductName = (productId: string) => {
-    return productMap[productId]?.name || 'Producto desconocido';
-  };
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -66,7 +53,7 @@ export function Cart({ products }: { products: Product[] }) {
               className="flex justify-between items-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600 gap-2"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-xs sm:text-sm truncate text-gray-900 dark:text-gray-100">{getProductName(item.product_id)}</p>
+                <p className="font-semibold text-xs sm:text-sm truncate text-gray-900 dark:text-gray-100">{item.product_name || 'Producto desconocido'}</p>
                 <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-300 mt-1">
                   ${item.price.toFixed(2)} × {item.quantity} = 
                   <span className="font-semibold ml-1">

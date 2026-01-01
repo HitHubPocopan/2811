@@ -100,6 +100,7 @@ export default function CatalogPage() {
   const handleAddToCart = (product: Product) => {
     addItem({
       product_id: product.id,
+      product_name: product.name,
       quantity: 1,
       price: product.price,
     });
