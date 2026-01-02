@@ -36,12 +36,16 @@ export const importExportService = {
 
   async exportProductsToExcel(products: Product[]): Promise<void> {
     const data = products.map((p) => ({
+      ID: p.id,
       Nombre: p.name,
       Categoria: p.category || '',
       SubCAT: p.subcategory || '',
       Descripcion: p.description,
       'Precio Venta': p.price,
+      Stock: p.stock,
       Imagen: p.image_url,
+      'Fecha Creacion': p.created_at ? new Date(p.created_at).toLocaleString('es-AR') : '',
+      'Ultima Actualizacion': p.updated_at ? new Date(p.updated_at).toLocaleString('es-AR') : '',
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
@@ -49,12 +53,16 @@ export const importExportService = {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
 
     worksheet['!cols'] = [
-      { wch: 25 },
-      { wch: 18 },
-      { wch: 18 },
-      { wch: 30 },
-      { wch: 15 },
-      { wch: 35 },
+      { wch: 36 }, // ID
+      { wch: 25 }, // Nombre
+      { wch: 18 }, // Categoria
+      { wch: 18 }, // SubCAT
+      { wch: 30 }, // Descripcion
+      { wch: 15 }, // Precio Venta
+      { wch: 10 }, // Stock
+      { wch: 35 }, // Imagen
+      { wch: 20 }, // Fecha Creacion
+      { wch: 20 }, // Ultima Actualizacion
     ];
 
     XLSX.writeFile(workbook, `productos_${new Date().toISOString().split('T')[0]}.xlsx`);

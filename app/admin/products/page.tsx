@@ -17,6 +17,7 @@ export default function ProductsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -197,7 +198,15 @@ export default function ProductsPage() {
   };
 
   const handleExportExcel = async () => {
-    await importExportService.exportProductsToExcel(products);
+    setExporting(true);
+    try {
+      const allProducts = await productService.getAll();
+      await importExportService.exportProductsToExcel(allProducts);
+    } catch (error) {
+      console.error('Error al exportar:', error);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleAddPurchase = async () => {
@@ -290,9 +299,10 @@ export default function ProductsPage() {
               <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={handleExportExcel}
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm"
+                  disabled={exporting}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow font-semibold text-sm disabled:opacity-50"
                 >
-                  📊 Exportar
+                  {exporting ? '📊 Exportando...' : '📊 Exportar'}
                 </button>
                 <label className="cursor-pointer">
                   <input
