@@ -100,7 +100,7 @@ export const salesService = {
     try {
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*')
+        .select('total, items, created_at')
         .eq('pos_number', posNumber);
 
       if (error || !sales) {
@@ -155,7 +155,7 @@ export const salesService = {
     try {
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*');
+        .select('total, items');
 
       if (error || !sales) {
         return null;
@@ -219,7 +219,7 @@ export const salesService = {
 
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*')
+        .select('total')
         .eq('pos_number', posNumber)
         .gte('created_at', startOfDay.toISOString())
         .lt('created_at', endOfDay.toISOString());
@@ -251,7 +251,7 @@ export const salesService = {
 
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*')
+        .select('total')
         .gte('created_at', startOfDay.toISOString())
         .lt('created_at', endOfDay.toISOString());
 
@@ -275,7 +275,7 @@ export const salesService = {
 
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*')
+        .select('total, created_at, pos_number')
         .gte('created_at', startDate.toISOString());
 
       if (error || !sales) {
@@ -332,7 +332,7 @@ export const salesService = {
 
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*')
+        .select('total, created_at')
         .eq('pos_number', posNumber)
         .gte('created_at', startDate.toISOString());
 

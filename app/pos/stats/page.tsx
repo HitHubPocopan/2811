@@ -249,7 +249,7 @@ export default function StatsPage() {
 
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*')
+        .select('total, created_at')
         .eq('pos_number', posNumber)
         .gte('created_at', startDate.toISOString());
 
@@ -338,7 +338,7 @@ export default function StatsPage() {
       
       const { data: sales, error } = await supabase
         .from('sales')
-        .select('*')
+        .select('total, payment_method, payment_breakdown, created_at')
         .eq('pos_number', user.pos_number || 0);
       
       if (!error && sales) {

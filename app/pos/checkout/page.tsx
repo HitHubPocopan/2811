@@ -11,8 +11,6 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { items, getTotal, clearCart } = useCartStore();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -32,23 +30,11 @@ export default function CheckoutPage() {
       router.push('/pos/catalog');
       return;
     }
-
-    const fetchProducts = async () => {
-      setLoadingProducts(true);
-      const data = await productService.getAll();
-      setProducts(data);
-      setLoadingProducts(false);
-    };
-
-    fetchProducts();
   }, [user, router, items]);
 
   const handleCompleteSale = async () => {
     if (!user || user.role !== 'pos') return;
-    if (loadingProducts) {
-      setError('Cargando información de productos. Por favor espera...');
-      return;
-    }
+    
     if (!paymentMethod) {
       setError('Por favor selecciona un método de pago.');
       return;
@@ -66,12 +52,9 @@ export default function CheckoutPage() {
     setError('');
 
     const saleItems: SaleItem[] = items.map((item) => {
-      // Intentar obtener el nombre del item guardado, o buscarlo en la lista cargada como respaldo
-      const productName = item.product_name || products.find(p => p.id === item.product_id)?.name || 'Producto desconocido';
-      
       return {
         product_id: item.product_id,
-        product_name: productName,
+        product_name: item.product_name || 'Producto desconocido',
         quantity: item.quantity,
         unit_price: item.price,
         subtotal: item.price * item.quantity,

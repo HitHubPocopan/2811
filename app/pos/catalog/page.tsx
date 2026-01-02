@@ -29,7 +29,11 @@ export default function CatalogPage() {
 
   const getSalesCountByProduct = async () => {
     try {
-      const { data: sales, error } = await supabase.from('sales').select('*');
+      const { data: sales, error } = await supabase
+        .from('sales')
+        .select('items')
+        .order('created_at', { ascending: false })
+        .limit(200);
       if (error || !sales) return;
 
       const counts: Record<string, number> = {};
@@ -238,9 +242,10 @@ export default function CatalogPage() {
                           <img
                             src={product.image_url}
                             alt={product.name}
+                            loading="lazy"
                             className="w-full h-24 object-cover rounded mb-2"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Sin+Imagen';
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%23999999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ESin%20Imagen%3C%2Ftext%3E%3C%2Fsvg%3E';
                             }}
                           />
                         )}
