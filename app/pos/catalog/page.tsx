@@ -37,7 +37,7 @@ export default function CatalogPage() {
       if (error || !sales) return;
 
       const counts: Record<string, number> = {};
-      sales.forEach((sale: Sale) => {
+      sales.forEach((sale: any) => {
         sale.items.forEach((item: any) => {
           if (!counts[item.product_id]) {
             counts[item.product_id] = 0;

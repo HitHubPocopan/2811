@@ -180,12 +180,12 @@ async function getWeatherByPos(posNumber: number, days: number = 200): Promise<R
 }
 
 function getSalesByWeatherAndHour(
-  sales: Sale[],
+  sales: any[],
   weatherByDate: Record<string, DayWeatherDetail>
 ): WeatherSalesData[] {
   const weatherSales: Record<string, number> = {};
 
-  sales.forEach((sale) => {
+  sales.forEach((sale: any) => {
     const saleDate = new Date(sale.created_at);
     const saleDateArg = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
     const hour = saleDateArg.getHours();
@@ -212,10 +212,10 @@ function getSalesByWeatherAndHour(
   return Object.entries(weatherSales).map(([label, total]) => ({ label, total }));
 }
 
-function getSalesByPaymentMethod(sales: Sale[]): PaymentSalesData[] {
+function getSalesByPaymentMethod(sales: any[]): PaymentSalesData[] {
   const paymentSales: Record<string, number> = {};
 
-  sales.forEach((sale) => {
+  sales.forEach((sale: any) => {
     const method = sale.payment_method || 'Desconocido';
     if (!paymentSales[method]) {
       paymentSales[method] = 0;
@@ -265,7 +265,7 @@ export default function StatsPage() {
       };
       let grandTotal = 0;
 
-      sales.forEach((sale: Sale) => {
+      sales.forEach((sale: any) => {
         const saleDate = new Date(sale.created_at);
         const saleDateArg = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
         const hour = saleDateArg.getHours();

@@ -144,7 +144,7 @@ export const salesService = {
         total_revenue,
         total_items_sold,
         top_products,
-        last_sales: sales.slice(0, 10),
+        last_sales: sales.slice(0, 10) as any,
       };
     } catch {
       return null;
