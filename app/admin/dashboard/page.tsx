@@ -157,7 +157,8 @@ export default function AdminDashboardPage() {
 
     const channel = supabase
       .channel('admin_dashboard_realtime')
-      .on('postgres_changes', { event: 'INSERT', table: 'sales' }, (payload) => {
+      // @ts-expect-error - Realtime types mismatch in current version
+      .on('postgres_changes', { event: 'INSERT', table: 'sales', schema: 'public' }, (payload) => {
         setAllSales(prev => [payload.new as Sale, ...prev]);
       })
       .subscribe();
