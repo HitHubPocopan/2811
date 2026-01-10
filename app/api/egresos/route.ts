@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('pos_number', parseInt(posNumber, 10));
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(5000);
 
     if (error) {
       return NextResponse.json(

@@ -5,8 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
 import { salesService } from '@/lib/services/sales';
+import { predictionService } from '@/lib/services/prediction';
 import { POSDashboardStats, Sale } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
+import { weatherService, WeatherCondition } from '@/lib/services/weather';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface HourlyData {
@@ -37,9 +38,9 @@ interface PaymentSalesData {
 }
 
 const LOCATION_COORDINATES: Record<number, { lat: number; lon: number }> = {
-  1: { lat: -34.5371, lon: -56.4237 },
-  2: { lat: -36.7961, lon: -56.8997 },
-  3: { lat: -36.5275, lon: -56.7586 },
+  1: { lat: -36.4333, lon: -56.7167 }, // Costa del Este
+  2: { lat: -37.3333, lon: -57.0167 }, // Mar de las Pampas
+  3: { lat: -37.1328, lon: -56.7456 }, // Costa Esmeralda
 };
 
 const WEATHER_CODES: Record<number, string> = {
@@ -238,6 +239,7 @@ export default function POSDetailPage() {
   const [salesByWeather, setSalesByWeather] = useState<WeatherSalesData[]>([]);
   const [salesByPayment, setSalesByPayment] = useState<PaymentSalesData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentWeather, setCurrentWeather] = useState<WeatherCondition>('sunny');
   const posNumber = parseInt(params.posNumber as string, 10) || 0;
 
   const getSalesPerHour = async (pos: number, days = 30) => {
@@ -248,13 +250,9 @@ export default function POSDetailPage() {
       startDate.setDate(startDate.getDate() - days);
       startDate.setHours(3, 0, 0, 0);
 
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('*')
-        .eq('pos_number', pos)
-        .gte('created_at', startDate.toISOString());
+      const sales = await salesService.getSalesByPosNumber(pos, 5000, startDate.toISOString());
 
-      if (error || !sales) {
+      if (!sales) {
         return [];
       }
 
@@ -342,17 +340,16 @@ export default function POSDetailPage() {
 
     const fetchStats = async () => {
       try {
+        weatherService.getCurrentWeather(posNumber).then(setCurrentWeather);
         const data = await salesService.getPosDashboard('', posNumber);
         const perHour = await getSalesPerHour(posNumber, 30);
         const perDay = await salesService.getSalesByDayAndPos(posNumber, 200);
         const weather = await getWeatherByPos(posNumber, 200);
         
-        const { data: sales, error } = await supabase
-          .from('sales')
-          .select('*')
-          .eq('pos_number', posNumber);
+        // Use service with higher limit for statistics
+        const sales = await salesService.getSalesByPosNumber(posNumber, 5000);
         
-        if (!error && sales) {
+        if (sales && sales.length > 0) {
           setSalesByWeather(getSalesByWeatherAndHour(sales, weather));
           setSalesByPayment(getSalesByPaymentMethod(sales));
         }
@@ -381,6 +378,34 @@ export default function POSDetailPage() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">
           Estadísticas - POS {posNumber}
         </h1>
+
+        {stats && (
+          <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow border-l-4 border-orange-500">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Predicción para Hoy</h2>
+                <div className="flex gap-4 mt-2">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-gray-400">Mañana</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-200">{predictionService.getForecast(posNumber, currentWeather).morning.icon} {predictionService.getForecast(posNumber, currentWeather).morning.status}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-gray-400">Tarde</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-200">{predictionService.getForecast(posNumber, currentWeather).afternoon.icon} {predictionService.getForecast(posNumber, currentWeather).afternoon.status}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-gray-400">Noche</span>
+                    <span className="font-semibold text-gray-700 dark:text-gray-200">{predictionService.getForecast(posNumber, currentWeather).night.icon} {predictionService.getForecast(posNumber, currentWeather).night.status}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg flex items-center gap-3 border border-orange-100 dark:border-orange-800/50">
+                <span className="text-2xl">💡</span>
+                <p className="text-sm font-medium text-orange-700 dark:text-orange-300">{predictionService.getForecast(posNumber).tip}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-12 text-gray-900 dark:text-gray-100">Cargando estadísticas...</div>

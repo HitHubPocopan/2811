@@ -7,6 +7,40 @@ const POS_NAMES: Record<number, string> = {
   3: 'Costa Esmeralda',
 };
 
+async function fetchAllFromSupabase(
+  table: string,
+  select: string,
+  filterCallback?: (query: any) => any
+): Promise<any[]> {
+  const allData: any[] = [];
+  let from = 0;
+  const step = 1000;
+
+  while (true) {
+    let query = supabase.from(table).select(select);
+    if (filterCallback) {
+      query = filterCallback(query);
+    }
+    
+    const { data, error } = await query
+      .range(from, from + step - 1)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error(`Error fetching from ${table}:`, error);
+      return allData; // Return what we have
+    }
+
+    if (!data || data.length === 0) break;
+    
+    allData.push(...data);
+    if (data.length < step) break;
+    from += step;
+  }
+
+  return allData;
+}
+
 export const salesService = {
   async createSale(
     posId: string,
@@ -61,6 +95,46 @@ export const salesService = {
     }
   },
 
+  async getSalesByPosNumber(posNumber: number, limit = 1000, startDate?: string): Promise<Sale[]> {
+    try {
+      let allData: Sale[] = [];
+      let from = 0;
+      const step = 1000;
+
+      while (allData.length < limit) {
+        const currentStep = Math.min(step, limit - allData.length);
+        let query = supabase
+          .from('sales')
+          .select('*')
+          .eq('pos_number', posNumber);
+        
+        if (startDate) {
+          query = query.gte('created_at', startDate);
+        }
+
+        const { data, error } = await query
+          .order('created_at', { ascending: false })
+          .range(from, from + currentStep - 1);
+
+        if (error) {
+          console.error(`Error fetching sales for POS ${posNumber}:`, error);
+          break;
+        }
+
+        if (!data || data.length === 0) break;
+        
+        allData.push(...data as Sale[]);
+        if (data.length < currentStep) break;
+        from += currentStep;
+      }
+
+      return allData;
+    } catch (error) {
+      console.error('Error in getSalesByPosNumber:', error);
+      return [];
+    }
+  },
+
   async deleteSale(saleId: string): Promise<boolean> {
     try {
       const { error } = await supabase
@@ -78,33 +152,58 @@ export const salesService = {
     }
   },
 
-  async getAllSales(limit = 100): Promise<Sale[]> {
+  async getAllSales(limit = 1000): Promise<Sale[]> {
     try {
-      const { data, error } = await supabase
-        .from('sales')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      let allData: Sale[] = [];
+      let from = 0;
+      const step = 1000;
 
-      if (error) {
-        return [];
+      while (allData.length < limit) {
+        const currentStep = Math.min(step, limit - allData.length);
+        const { data, error } = await supabase
+          .from('sales')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(from, from + currentStep - 1);
+
+        if (error) {
+          console.error('Error fetching all sales:', error);
+          break;
+        }
+
+        if (!data || data.length === 0) break;
+        
+        allData.push(...data as Sale[]);
+        if (data.length < currentStep) break;
+        from += currentStep;
       }
 
-      return data || [];
-    } catch {
+      return allData;
+    } catch (error) {
+      console.error('Error in getAllSales:', error);
       return [];
     }
   },
 
   async getPosDashboard(posId: string, posNumber: number): Promise<POSDashboardStats | null> {
     try {
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('total, items, created_at')
-        .eq('pos_number', posNumber);
+      const sales = await fetchAllFromSupabase(
+        'sales',
+        'total, items, created_at',
+        (q) => q.eq('pos_number', posNumber)
+      );
 
-      if (error || !sales) {
-        return null;
+      if (!sales || sales.length === 0) {
+        // Return empty stats instead of null to keep UI happy
+        return {
+          pos_number: posNumber,
+          pos_name: POS_NAMES[posNumber] || `POS ${posNumber}`,
+          total_sales: 0,
+          total_revenue: 0,
+          total_items_sold: 0,
+          top_products: [],
+          last_sales: [],
+        };
       }
 
       const total_sales = sales.length;
@@ -137,6 +236,9 @@ export const salesService = {
 
       const total_items_sold = Object.values(itemCounts).reduce((sum, item) => sum + item.quantity, 0);
 
+      // Sort by created_at desc for last_sales
+      const sortedSales = [...sales].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
       return {
         pos_number: posNumber,
         pos_name: POS_NAMES[posNumber] || `POS ${posNumber}`,
@@ -144,20 +246,19 @@ export const salesService = {
         total_revenue,
         total_items_sold,
         top_products,
-        last_sales: sales.slice(0, 10) as any,
+        last_sales: sortedSales.slice(0, 10) as any,
       };
-    } catch {
+    } catch (error) {
+      console.error('Error in getPosDashboard:', error);
       return null;
     }
   },
 
   async getAdminDashboard(): Promise<DashboardStats | null> {
     try {
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('total, items');
+      const sales = await fetchAllFromSupabase('sales', 'total, items');
 
-      if (error || !sales) {
+      if (!sales) {
         return null;
       }
 
@@ -197,7 +298,8 @@ export const salesService = {
         total_items_sold,
         top_products,
       };
-    } catch {
+    } catch (error) {
+      console.error('Error in getAdminDashboard:', error);
       return null;
     }
   },
@@ -217,19 +319,21 @@ export const salesService = {
       const endOfDay = new Date(startOfDay);
       endOfDay.setDate(endOfDay.getDate() + 1);
 
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('total')
-        .eq('pos_number', posNumber)
-        .gte('created_at', startOfDay.toISOString())
-        .lt('created_at', endOfDay.toISOString());
+      const sales = await fetchAllFromSupabase(
+        'sales',
+        'total',
+        (q) => q.eq('pos_number', posNumber)
+          .gte('created_at', startOfDay.toISOString())
+          .lt('created_at', endOfDay.toISOString())
+      );
 
-      if (error || !sales) {
+      if (!sales) {
         return 0;
       }
 
       return sales.reduce((sum, sale) => sum + sale.total, 0);
-    } catch {
+    } catch (error) {
+      console.error('Error in getTodaySalesTotal:', error);
       return 0;
     }
   },
@@ -249,18 +353,20 @@ export const salesService = {
       const endOfDay = new Date(startOfDay);
       endOfDay.setDate(endOfDay.getDate() + 1);
 
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('total')
-        .gte('created_at', startOfDay.toISOString())
-        .lt('created_at', endOfDay.toISOString());
+      const sales = await fetchAllFromSupabase(
+        'sales',
+        'total',
+        (q) => q.gte('created_at', startOfDay.toISOString())
+          .lt('created_at', endOfDay.toISOString())
+      );
 
-      if (error || !sales) {
+      if (!sales) {
         return 0;
       }
 
       return sales.reduce((sum, sale) => sum + sale.total, 0);
-    } catch {
+    } catch (error) {
+      console.error('Error in getTodaySalesCombined:', error);
       return 0;
     }
   },
@@ -268,17 +374,18 @@ export const salesService = {
   async getSalesPerDay(days = 30): Promise<Array<{ date: string; total: number; pos1: number; pos2: number; pos3: number }>> {
     try {
       const now = new Date();
-      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-      const startDate = new Date(argentinaTime);
-      startDate.setDate(startDate.getDate() - days);
-      startDate.setHours(3, 0, 0, 0);
+      // Calculate start date in Argentina time
+      const startDateArg = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+      startDateArg.setDate(startDateArg.getDate() - days);
+      startDateArg.setHours(3, 0, 0, 0);
 
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('total, created_at, pos_number')
-        .gte('created_at', startDate.toISOString());
+      const sales = await fetchAllFromSupabase(
+        'sales',
+        'total, created_at, pos_number',
+        (q) => q.gte('created_at', startDateArg.toISOString())
+      );
 
-      if (error || !sales) {
+      if (!sales) {
         return [];
       }
 
@@ -286,16 +393,20 @@ export const salesService = {
 
       sales.forEach((sale) => {
         const saleDate = new Date(sale.created_at);
-        const saleDateArg = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
         
-        let dayStart = new Date(saleDateArg);
-        dayStart.setHours(3, 0, 0, 0);
+        // Get Argentine hour and date
+        const hourInArg = parseInt(saleDate.toLocaleTimeString('en-US', { hour: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' }));
+        const dateStr = saleDate.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
         
-        if (saleDateArg.getHours() < 3) {
-          dayStart.setDate(dayStart.getDate() - 1);
+        let [year, month, day] = dateStr.split('-').map(Number);
+        let businessDate = new Date(year, month - 1, day);
+        
+        // 3 AM rule: if before 3 AM, it's the previous business day
+        if (hourInArg < 3) {
+          businessDate.setDate(businessDate.getDate() - 1);
         }
 
-        const dateKey = dayStart.toISOString().split('T')[0];
+        const dateKey = `${businessDate.getFullYear()}-${String(businessDate.getMonth() + 1).padStart(2, '0')}-${String(businessDate.getDate()).padStart(2, '0')}`;
         
         if (!salesByDay[dateKey]) {
           salesByDay[dateKey] = { total: 0, pos1: 0, pos2: 0, pos3: 0 };
@@ -316,8 +427,9 @@ export const salesService = {
           date,
           ...data,
         }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    } catch {
+        .sort((a, b) => a.date.localeCompare(b.date));
+    } catch (error) {
+      console.error('Error in getSalesPerDay:', error);
       return [];
     }
   },
@@ -325,18 +437,17 @@ export const salesService = {
   async getSalesByDayAndPos(posNumber: number, days = 30): Promise<Array<{ date: string; total: number }>> {
     try {
       const now = new Date();
-      const argentinaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
-      const startDate = new Date(argentinaTime);
-      startDate.setDate(startDate.getDate() - days);
-      startDate.setHours(3, 0, 0, 0);
+      const startDateArg = new Date(now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+      startDateArg.setDate(startDateArg.getDate() - days);
+      startDateArg.setHours(3, 0, 0, 0);
 
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('total, created_at')
-        .eq('pos_number', posNumber)
-        .gte('created_at', startDate.toISOString());
+      const sales = await fetchAllFromSupabase(
+        'sales',
+        'total, created_at',
+        (q) => q.eq('pos_number', posNumber).gte('created_at', startDateArg.toISOString())
+      );
 
-      if (error || !sales) {
+      if (!sales) {
         return [];
       }
 
@@ -344,16 +455,17 @@ export const salesService = {
 
       sales.forEach((sale) => {
         const saleDate = new Date(sale.created_at);
-        const saleDateArg = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' }));
+        const hourInArg = parseInt(saleDate.toLocaleTimeString('en-US', { hour: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' }));
+        const dateStr = saleDate.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
         
-        let dayStart = new Date(saleDateArg);
-        dayStart.setHours(3, 0, 0, 0);
+        let [year, month, day] = dateStr.split('-').map(Number);
+        let businessDate = new Date(year, month - 1, day);
         
-        if (saleDateArg.getHours() < 3) {
-          dayStart.setDate(dayStart.getDate() - 1);
+        if (hourInArg < 3) {
+          businessDate.setDate(businessDate.getDate() - 1);
         }
 
-        const dateKey = dayStart.toISOString().split('T')[0];
+        const dateKey = `${businessDate.getFullYear()}-${String(businessDate.getMonth() + 1).padStart(2, '0')}-${String(businessDate.getDate()).padStart(2, '0')}`;
         
         if (!salesByDay[dateKey]) {
           salesByDay[dateKey] = 0;
@@ -367,8 +479,9 @@ export const salesService = {
           date,
           total,
         }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    } catch {
+        .sort((a, b) => a.date.localeCompare(b.date));
+    } catch (error) {
+      console.error('Error in getSalesByDayAndPos:', error);
       return [];
     }
   },
@@ -379,14 +492,15 @@ export const salesService = {
       const dayEnd = new Date(dayStart);
       dayEnd.setDate(dayEnd.getDate() + 1);
 
-      const { data: sales, error } = await supabase
-        .from('sales')
-        .select('*')
-        .eq('pos_number', posNumber)
-        .gte('created_at', dayStart.toISOString())
-        .lt('created_at', dayEnd.toISOString());
+      const sales = await fetchAllFromSupabase(
+        'sales',
+        '*',
+        (q) => q.eq('pos_number', posNumber)
+          .gte('created_at', dayStart.toISOString())
+          .lt('created_at', dayEnd.toISOString())
+      );
 
-      if (error || !sales) {
+      if (!sales) {
         return [];
       }
 
@@ -406,28 +520,29 @@ export const salesService = {
         });
       });
 
-      return Object.values(productCounts)
-        .sort((a, b) => b.quantity - a.quantity);
-    } catch {
+      return Object.values(productCounts).sort((a, b) => b.quantity - a.quantity);
+    } catch (error) {
+      console.error('Error in getProductsByDayAndPos:', error);
       return [];
     }
   },
 
   async getAllProductsSoldByPos(posId: string, fromDate?: string): Promise<Record<string, Array<{ product_name: string; quantity: number }>>> {
     try {
-      let query = supabase
-        .from('sales')
-        .select('*')
-        .eq('pos_id', posId);
+      const sales = await fetchAllFromSupabase(
+        'sales',
+        '*',
+        (q) => {
+          let query = q.eq('pos_id', posId);
+          if (fromDate) {
+            const startDate = new Date(fromDate + 'T00:00:00');
+            query = query.gte('created_at', startDate.toISOString());
+          }
+          return query;
+        }
+      );
 
-      if (fromDate) {
-        const startDate = new Date(fromDate + 'T00:00:00');
-        query = query.gte('created_at', startDate.toISOString());
-      }
-
-      const { data: sales, error } = await query;
-
-      if (error || !sales) {
+      if (!sales) {
         return {};
       }
 
@@ -469,7 +584,8 @@ export const salesService = {
       });
 
       return result;
-    } catch {
+    } catch (error) {
+      console.error('Error in getAllProductsSoldByPos:', error);
       return {};
     }
   },
