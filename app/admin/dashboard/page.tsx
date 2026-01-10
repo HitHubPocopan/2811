@@ -507,8 +507,8 @@ export default function AdminDashboardPage() {
               {/* Sales Distribution Area Chart */}
               <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
                 <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm">Carga por Hora</h2>
-                  <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">24 Horas</span>
+                  <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm">Carga por Hora</h2>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">24 Horas</span>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={hourlySales}>
@@ -534,10 +534,10 @@ export default function AdminDashboardPage() {
               <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col">
                 <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm">Rendimiento Semanal</h2>
+                    <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm">Rendimiento Semanal</h2>
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Refuerzo de stock y personal</p>
                   </div>
-                  <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Lun - Dom</span>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Lun - Dom</span>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={weeklySales}>
@@ -557,29 +557,29 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Critical Inventory Section */}
               <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col">
-                <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm mb-8">Stock Crítico</h2>
+                <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm mb-8">Stock Crítico</h2>
                 <div className="space-y-3 flex-1">
                   {lowStockProducts.length > 0 ? (
                     lowStockProducts.slice(0, 5).map(product => (
                       <div key={product.id} className="group flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-orange-200 transition-all">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-gray-700 truncate max-w-[140px] tracking-tight">{product.name}</span>
-                          <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">{product.category || 'General'}</span>
+                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{product.category || 'General'}</span>
                         </div>
                         <div className="text-right">
-                          <div className={`text-xl font-black ${product.stock === 0 ? 'text-red-500' : 'text-amber-500'}`}>{product.stock}</div>
-                          <div className="text-[8px] text-gray-400 font-black uppercase tracking-[0.2em]">UNIDADES</div>
+                          <div className={`text-xl font-bold ${product.stock === 0 ? 'text-red-500' : 'text-amber-500'}`}>{product.stock}</div>
+                          <div className="text-[8px] text-gray-400 font-bold uppercase tracking-[0.2em]">UNIDADES</div>
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full py-10 grayscale opacity-20">
                       <span className="text-5xl mb-4">✨</span>
-                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">Inventario Óptimo</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em]">Inventario Óptimo</p>
                     </div>
                   )}
                 </div>
-                <Link href="/admin/products" className="mt-8 text-center text-[10px] font-black text-orange-500 hover:text-orange-600 tracking-[0.2em] uppercase transition-all bg-gray-50 py-3 rounded-xl border border-gray-100">
+                <Link href="/admin/products" className="mt-8 text-center text-[10px] font-bold text-orange-500 hover:text-orange-600 tracking-[0.2em] uppercase transition-all bg-gray-50 py-3 rounded-xl border border-gray-100">
                   Gestionar Inventario →
                 </Link>
               </div>
@@ -587,13 +587,13 @@ export default function AdminDashboardPage() {
               {/* Low Rotation Products (Scrollable) */}
               <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col h-[480px]">
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm">Baja Rotación</h2>
-                  <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Análisis Mensual</span>
+                  <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm">Baja Rotación</h2>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Análisis Mensual</span>
                 </div>
                 <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
                   <table className="w-full text-left">
                     <thead className="sticky top-0 bg-white z-10">
-                      <tr className="text-gray-400 text-[9px] font-black uppercase tracking-widest border-b border-gray-100">
+                      <tr className="text-gray-400 text-[9px] font-bold uppercase tracking-widest border-b border-gray-100">
                         <th className="pb-4">Producto</th>
                         <th className="pb-4 text-right">Ventas</th>
                         <th className="pb-4 text-right">Acción</th>
@@ -765,7 +765,7 @@ function StatCard({ title, value, icon, color, comparison, reverseColors }: {
           )}
         </div>
         <div className="flex items-center justify-between">
-          <h3 className="text-3xl font-extralight text-slate-900 tracking-tighter">{value}</h3>
+          <h3 className="text-3xl font-bold text-slate-900 tracking-tighter">{value}</h3>
           <div className={`w-10 h-10 rounded-xl ${color.split(' ')[0]} flex items-center justify-center text-xl grayscale group-hover:grayscale-0 transition-all duration-700`}>
             {icon}
           </div>
@@ -778,4 +778,4 @@ function StatCard({ title, value, icon, color, comparison, reverseColors }: {
   );
 }
 
-const COLORS = ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#6366f1'];
+const COLORS = ['#ef7d1a', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#6366f1'];

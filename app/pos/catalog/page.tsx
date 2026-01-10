@@ -146,12 +146,12 @@ export default function CatalogPage() {
               </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full">
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex-1 transition-all hover:shadow-md">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Turno</p>
-                <p className="text-2xl font-black text-orange-500 tracking-tight">${todayTotal.toFixed(2)}</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Turno</p>
+                <p className="text-2xl font-bold text-orange-500 tracking-tight">${todayTotal.toFixed(2)}</p>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex-1 transition-all hover:shadow-md">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Redes</p>
-                <p className="text-2xl font-black text-blue-500 tracking-tight">${todayTotalCombined.toFixed(2)}</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Redes</p>
+                <p className="text-2xl font-bold text-blue-500 tracking-tight">${todayTotalCombined.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function CatalogPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Categoría</label>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Categoría</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => {
@@ -187,7 +187,7 @@ export default function CatalogPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Sub-Categoría</label>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Sub-Categoría</label>
               <select
                 value={selectedSubcategory}
                 onChange={(e) => setSelectedSubcategory(e.target.value)}
@@ -209,14 +209,14 @@ export default function CatalogPage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent mx-auto mb-4"></div>
-              <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">Cargando Catálogo</p>
+              <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.3em]">Cargando Catálogo</p>
             </div>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center grayscale opacity-30">
               <span className="text-5xl mb-4 block">📦</span>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                 {searchTerm ? 'No hay coincidencias' : 'Inventario Vacío'}
               </p>
             </div>
@@ -237,7 +237,7 @@ export default function CatalogPage() {
                       className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all p-3 border border-gray-100 flex flex-col relative overflow-hidden"
                     >
                       <div className="absolute top-2 right-2 z-10">
-                        <div className={`${badgeColor} text-white rounded-full min-w-[24px] h-[24px] px-1.5 flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white`}>
+                        <div className={`${badgeColor} text-white rounded-full min-w-[24px] h-[24px] px-1.5 flex items-center justify-center text-[10px] font-bold shadow-lg border-2 border-white`}>
                           {count}
                         </div>
                       </div>
@@ -254,23 +254,23 @@ export default function CatalogPage() {
                           />
                         </div>
                       )}
-                      <h3 className="font-bold text-xs text-gray-900 mb-2 line-clamp-2 uppercase tracking-tight h-8" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
+                      <h3 className="font-bold text-[11px] text-gray-900 mb-2 line-clamp-2 uppercase tracking-tight h-8 leading-tight" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
                       
                       <div className="flex flex-wrap gap-1 mb-3 flex-grow">
                         {product.category && (
-                          <span className="text-[8px] font-black bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-orange-100">
+                          <span className="text-[8px] font-bold bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-orange-100">
                             {product.category}
                           </span>
                         )}
                       </div>
                       
                       <div className="flex justify-between items-center mt-auto pt-3 border-t border-gray-50">
-                        <span className="text-sm font-black text-gray-900 tracking-tight">
+                        <span className="text-sm font-bold text-gray-900 tracking-tight">
                           ${product.price.toLocaleString()}
                         </span>
                         <button
                           onClick={() => handleAddToCart(product)}
-                          className="bg-gray-900 text-white p-2 rounded-xl hover:bg-orange-500 transition-colors shadow-lg shadow-gray-900/10 active:scale-95"
+                          className="bg-orange-500 text-white p-2 rounded-xl hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/10 active:scale-95"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -292,7 +292,7 @@ export default function CatalogPage() {
         </div>
         <button
           onClick={handleCheckout}
-          className="flex-shrink-0 w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/20 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/10"
+          className="flex-shrink-0 w-full bg-orange-500 text-white py-4 rounded-2xl font-bold text-sm uppercase tracking-[0.2em] hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/20 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/10"
         >
           Finalizar Venta
         </button>
