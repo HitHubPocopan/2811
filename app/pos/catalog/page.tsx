@@ -144,162 +144,159 @@ export default function CatalogPage() {
                   Mostrando {filteredProducts.length} de {products.length} productos
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
-                <div className="bg-white rounded-lg shadow p-2 sm:p-3 border-2 border-orange-200 text-right flex-1">
-                  <p className="text-xs font-semibold text-gray-600 mb-1">MI POS</p>
-                  <p className="text-lg sm:text-2xl font-bold text-orange-600">${todayTotal.toFixed(2)}</p>
-                </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow p-2 sm:p-3 border-2 border-blue-300 text-right flex-1">
-                  <p className="text-xs font-semibold text-blue-600 mb-1">TOTAL REDES</p>
-                  <p className="text-lg sm:text-2xl font-bold text-blue-600">${todayTotalCombined.toFixed(2)}</p>
-                </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex-1 transition-all hover:shadow-md">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Turno</p>
+                <p className="text-2xl font-black text-orange-500 tracking-tight">${todayTotal.toFixed(2)}</p>
               </div>
-            </div>
-            
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 sm:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm mb-4 text-black text-base"
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Categoría</label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => {
-                    setSelectedCategory(e.target.value);
-                    setSelectedSubcategory('');
-                  }}
-                  className="w-full px-3 py-2 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-xs sm:text-sm text-black"
-                >
-                  <option value="">Todas ({categories.length})</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Sub-Categoría</label>
-                <select
-                  value={selectedSubcategory}
-                  onChange={(e) => setSelectedSubcategory(e.target.value)}
-                  disabled={!selectedCategory}
-                  className="w-full px-3 py-2 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed text-black"
-                >
-                  <option value="">Todas ({subcategories.length})</option>
-                  {subcategories.map((subcat) => (
-                    <option key={subcat} value={subcat}>
-                      {subcat}
-                    </option>
-                  ))}
-                </select>
+              <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex-1 transition-all hover:shadow-md">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Redes</p>
+                <p className="text-2xl font-black text-blue-500 tracking-tight">${todayTotalCombined.toFixed(2)}</p>
               </div>
             </div>
           </div>
+          
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar por nombre o categoría..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-5 py-4 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 shadow-sm mb-4 text-gray-900 text-sm transition-all placeholder-gray-300 font-medium"
+            />
+          </div>
 
-          {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Cargando productos...</p>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Categoría</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  setSelectedSubcategory('');
+                }}
+                className="w-full px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 shadow-sm text-xs font-bold text-gray-600 appearance-none transition-all"
+              >
+                <option value="">Todas ({categories.length})</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat.toUpperCase()}
+                  </option>
+                ))}
+              </select>
             </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-gray-600 text-lg">
-                  {searchTerm ? '❌ No hay productos que coincidan con tu búsqueda' : '📦 No hay productos disponibles'}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 pb-4">
-                  {filteredProducts.map((product) => {
-                    const count = productSalesCount[product.id] || 0;
-                    let badgeColor = 'bg-blue-500';
-                    if (count > 0 && count <= 5) badgeColor = 'bg-yellow-500';
-                    if (count > 5) badgeColor = 'bg-red-500';
 
-                    return (
-                      <div
-                        key={product.id}
-                        className="bg-white rounded-lg shadow hover:shadow-md transition-all p-2 border border-gray-100 flex flex-col relative"
-                      >
-                        <div className="absolute -top-2 -right-2 z-10">
-                          <div className={`${badgeColor} text-white rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold shadow-md border-2 border-white`}>
-                            {count}
-                          </div>
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Sub-Categoría</label>
+              <select
+                value={selectedSubcategory}
+                onChange={(e) => setSelectedSubcategory(e.target.value)}
+                disabled={!selectedCategory}
+                className="w-full px-4 py-3 bg-white border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 shadow-sm text-xs font-bold text-gray-600 appearance-none disabled:opacity-30 transition-all"
+              >
+                <option value="">Todas ({subcategories.length})</option>
+                {subcategories.map((subcat) => (
+                  <option key={subcat} value={subcat}>
+                    {subcat.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-orange-500 border-t-transparent mx-auto mb-4"></div>
+              <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">Cargando Catálogo</p>
+            </div>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center grayscale opacity-30">
+              <span className="text-5xl mb-4 block">📦</span>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                {searchTerm ? 'No hay coincidencias' : 'Inventario Vacío'}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-gray-100 scrollbar-track-transparent">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 pb-4">
+                {filteredProducts.map((product) => {
+                  const count = productSalesCount[product.id] || 0;
+                  let badgeColor = 'bg-blue-500';
+                  if (count > 0 && count <= 5) badgeColor = 'bg-amber-500';
+                  if (count > 5) badgeColor = 'bg-red-500';
+
+                  return (
+                    <div
+                      key={product.id}
+                      className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all p-3 border border-gray-100 flex flex-col relative overflow-hidden"
+                    >
+                      <div className="absolute top-2 right-2 z-10">
+                        <div className={`${badgeColor} text-white rounded-full min-w-[24px] h-[24px] px-1.5 flex items-center justify-center text-[10px] font-black shadow-lg border-2 border-white`}>
+                          {count}
                         </div>
-                        {product.image_url && (
+                      </div>
+                      {product.image_url && (
+                        <div className="relative h-28 w-full mb-3 overflow-hidden rounded-xl bg-gray-50">
                           <img
                             src={product.image_url}
                             alt={product.name}
                             loading="lazy"
-                            className="w-full h-24 object-cover rounded mb-2"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23eeeeee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%23999999%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ESin%20Imagen%3C%2Ftext%3E%3C%2Fsvg%3E';
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22150%22%20height%3D%22150%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20150%20150%22%20preserveAspectRatio%3D%22none%22%3E%3Crect%20width%3D%22150%22%20height%3D%22150%22%20fill%3D%22%23f9fafb%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%23e5e7eb%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ESin%20Imagen%3C%2Ftext%3E%3C%2Fsvg%3E';
                             }}
                           />
-                        )}
-                        <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
-                        
-                        {(product.category || product.subcategory) && (
-                          <div className="mb-1 flex-grow">
-                            <div className="flex gap-1 flex-wrap">
-                              {product.category && (
-                                <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
-                                  {product.category}
-                                </span>
-                              )}
-                              {product.subcategory && (
-                                <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold" style={{ WebkitFontSmoothing: 'antialiased' }}>
-                                  {product.subcategory}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-lg font-bold text-orange-600">
-                            ${product.price.toFixed(2)}
-                          </span>
                         </div>
-                        
+                      )}
+                      <h3 className="font-bold text-xs text-gray-900 mb-2 line-clamp-2 uppercase tracking-tight h-8" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}>{product.name}</h3>
+                      
+                      <div className="flex flex-wrap gap-1 mb-3 flex-grow">
+                        {product.category && (
+                          <span className="text-[8px] font-black bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full uppercase tracking-wider border border-orange-100">
+                            {product.category}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex justify-between items-center mt-auto pt-3 border-t border-gray-50">
+                        <span className="text-sm font-black text-gray-900 tracking-tight">
+                          ${product.price.toLocaleString()}
+                        </span>
                         <button
                           onClick={() => handleAddToCart(product)}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-1 px-2 rounded text-xs font-semibold transition"
+                          className="bg-gray-900 text-white p-2 rounded-xl hover:bg-orange-500 transition-colors shadow-lg shadow-gray-900/10 active:scale-95"
                         >
-                          Agregar
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
                         </button>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
+      </div>
 
-        <div className="w-full xl:w-96 flex flex-col gap-4 overflow-hidden">
-          <div className="flex-1 min-h-0">
-            <Cart products={products} />
-          </div>
-          <button
-            onClick={handleCheckout}
-            className="flex-shrink-0 w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transition shadow-md"
-          >
-            ✓ Finalizar venta
-          </button>
+      <div className="w-full xl:w-96 flex flex-col gap-4 overflow-hidden bg-white/50 p-4 xl:p-0">
+        <div className="flex-1 min-h-0">
+          <Cart products={products} />
         </div>
+        <button
+          onClick={handleCheckout}
+          className="flex-shrink-0 w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/20 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/10"
+        >
+          Finalizar Venta
+        </button>
+      </div>
       </div>
     </div>
   );

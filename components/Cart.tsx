@@ -24,64 +24,69 @@ export function Cart({ products }: { products: Product[] }) {
 
   if (items.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow flex flex-col h-full items-center justify-center text-center text-gray-600 dark:text-gray-400 p-4 sm:p-6">
-        <p className="text-3xl mb-3">🛒</p>
-        <p className="font-semibold text-base sm:text-lg mb-1 text-gray-700 dark:text-gray-200">El carrito está vacío</p>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Agrega algunos productos para comenzar</p>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full items-center justify-center text-center p-8 transition-all">
+        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-2xl grayscale opacity-30">🛒</div>
+        <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-1">Carrito Vacío</p>
+        <p className="text-[10px] text-gray-300 uppercase font-bold tracking-widest">Agrega productos para comenzar</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow flex flex-col h-full">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full overflow-hidden transition-all">
       {/* Header fijo */}
-      <div className="flex-shrink-0 p-4 sm:p-6 border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
+      <div className="flex-shrink-0 p-5 border-b border-gray-50">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">Carrito</h2>
-          <span className="bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-100 px-2 py-1 rounded-full text-xs sm:text-sm font-medium">
-            {items.length} {items.length === 1 ? 'producto' : 'productos'}
+          <div>
+            <h2 className="text-sm font-black text-gray-900 uppercase tracking-widest">Carrito</h2>
+            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Venta en proceso</p>
+          </div>
+          <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-orange-100">
+            {items.length} {items.length === 1 ? 'Ítem' : 'Ítems'}
           </span>
         </div>
       </div>
       
       {/* Área scrolleable de productos */}
-      <div className="flex-1 overflow-hidden bg-white dark:bg-gray-800">
-        <div className="h-full overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-100 scrollbar-track-transparent">
           {items.map((item) => (
             <div
               key={item.product_id}
-              className="flex justify-between items-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600 gap-2"
+              className="flex justify-between items-center p-3 bg-gray-50/50 rounded-xl border border-gray-100 gap-3 group transition-all hover:bg-white hover:shadow-md hover:border-orange-100"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-xs sm:text-sm truncate text-gray-900 dark:text-gray-100">{item.product_name || 'Producto desconocido'}</p>
-                <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-300 mt-1">
-                  ${item.price.toFixed(2)} × {item.quantity} = 
-                  <span className="font-semibold ml-1">
-                    ${(item.price * item.quantity).toFixed(2)}
+                <p className="font-black text-[11px] uppercase tracking-tight text-gray-800 truncate mb-1">{item.product_name || 'Producto desconocido'}</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-gray-400">${item.price.toLocaleString()}</span>
+                  <span className="text-[10px] text-gray-300">×</span>
+                  <span className="text-[10px] font-black text-orange-500">{item.quantity}</span>
+                  <span className="text-[10px] text-gray-300">=</span>
+                  <span className="text-[11px] font-black text-gray-900">
+                    ${(item.price * item.quantity).toLocaleString()}
                   </span>
-                </p>
+                </div>
               </div>
-              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={item.quantity}
-                  onChange={(e) => handleQuantityChange(item.product_id, parseInt(e.target.value) || 1)}
-                  onBlur={(e) => {
-                    if (!e.target.value || parseInt(e.target.value) < 1) {
-                      handleQuantityChange(item.product_id, 1);
-                    }
-                  }}
-                  className="w-12 sm:w-16 p-2 border border-gray-300 dark:border-gray-600 rounded text-center text-xs sm:text-sm text-gray-900 dark:text-white dark:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center bg-white border border-gray-100 rounded-lg overflow-hidden">
+                  <button 
+                    onClick={() => handleQuantityChange(item.product_id, item.quantity - 1)}
+                    className="px-2 py-1 hover:bg-gray-50 text-gray-400 transition-colors"
+                  >-</button>
+                  <span className="px-2 text-[10px] font-black text-gray-700 w-6 text-center">{item.quantity}</span>
+                  <button 
+                    onClick={() => handleQuantityChange(item.product_id, item.quantity + 1)}
+                    className="px-2 py-1 hover:bg-gray-50 text-gray-400 transition-colors"
+                  >+</button>
+                </div>
                 <button
                   onClick={() => removeItem(item.product_id)}
-                  className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors duration-200 text-xs font-medium min-w-[32px]"
-                  aria-label="Eliminar producto"
-                  title="Eliminar producto"
+                  className="text-gray-300 hover:text-red-500 transition-colors p-1"
+                  aria-label="Eliminar"
                 >
-                  ✕
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -90,17 +95,17 @@ export function Cart({ products }: { products: Product[] }) {
       </div>
 
       {/* Footer fijo con total y botones */}
-      <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 p-4 sm:p-6 bg-gradient-to-r from-orange-50 to-slate-50 dark:from-gray-800 dark:to-gray-900">
-        <div className="flex justify-between text-base sm:text-lg font-bold mb-4">
-          <span className="text-gray-900 dark:text-white">Total:</span>
-          <span className="text-orange-600 dark:text-orange-400">${total.toFixed(2)}</span>
+      <div className="flex-shrink-0 border-t border-gray-50 p-5 bg-gray-50/30">
+        <div className="flex justify-between items-center mb-5">
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Total Final</span>
+          <span className="text-xl font-black text-gray-900 tracking-tight">${total.toLocaleString()}</span>
         </div>
 
         <button
           onClick={clearCart}
-          className="w-full bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100 py-2 sm:py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors duration-200 text-xs sm:text-sm font-medium"
+          className="w-full text-[9px] font-black text-gray-400 uppercase tracking-widest py-2 rounded-xl hover:text-red-500 hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
         >
-          Limpiar carrito
+          Limpiar Todo
         </button>
       </div>
     </div>

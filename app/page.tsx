@@ -41,29 +41,34 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-500 to-orange-700 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 dark:text-white">
-          Sistema de Ventas
-        </h1>
+    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-6 font-sans">
+      <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-10 w-full max-w-md">
+        <div className="mb-10 text-center">
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+            SISTEMA<span className="text-orange-500">VENTAS</span>
+          </h1>
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mt-2">
+            Panel de Acceso
+          </p>
+        </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Email
+            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+              Email de Usuario
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black dark:text-white dark:bg-gray-700"
-              placeholder="admin@example.com"
+              className="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all text-gray-900 placeholder-gray-300"
+              placeholder="admin@ejemplo.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
               Contraseña
             </label>
             <input
@@ -71,13 +76,13 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black dark:text-white dark:bg-gray-700"
+              className="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all text-gray-900 placeholder-gray-300"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg text-sm">
+            <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-xs font-bold text-center">
               {error}
             </div>
           )}
@@ -85,9 +90,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-600 dark:bg-orange-600 text-white py-2 rounded-lg font-semibold hover:bg-orange-700 dark:hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-orange-500 text-white py-3.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-orange-600 active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
           >
-            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            {loading ? 'Verificando...' : 'Entrar al Sistema'}
           </button>
         </form>
       </div>

@@ -65,18 +65,18 @@ export function Navbar() {
       ];
 
   return (
-    <nav className="bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-md" style={{ WebkitFontSmoothing: 'antialiased' }}>
-      <div className="px-3 sm:px-6 py-3">
+    <nav className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50" style={{ WebkitFontSmoothing: 'antialiased' }}>
+      <div className="px-3 sm:px-6 py-2.5">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4 flex-shrink-0">
-            <Link href="/" className="text-base sm:text-lg font-bold whitespace-nowrap">
-              Sistema de Ventas
+          <div className="flex items-center gap-6 flex-shrink-0">
+            <Link href="/" className="text-base sm:text-lg font-extrabold tracking-tight text-gray-900 whitespace-nowrap">
+              SISTEMA<span className="text-orange-500">VENTAS</span>
             </Link>
             
             {forecast && (
-              <div className="hidden md:flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full border border-white/20">
-                <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">Se Pronostica:</span>
-                <div className="flex gap-4 text-[11px] font-medium">
+              <div className="hidden md:flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">Pronóstico:</span>
+                <div className="flex gap-4 text-[11px] font-semibold text-gray-600">
                   <div className="flex items-center gap-1.5" title={`Mañana: ${forecast.morning.status}`}>
                     <span className="opacity-70">Mañana</span>
                     <span>{forecast.morning.icon}</span>
@@ -96,20 +96,20 @@ export function Navbar() {
           
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden p-2 hover:bg-orange-500 rounded transition flex-shrink-0"
+            className="lg:hidden p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors flex-shrink-0"
             aria-label="Toggle menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
             </svg>
           </button>
 
-          <div className="hidden lg:flex items-center gap-6">
+          <div className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium hover:bg-white hover:text-orange-600 px-3 py-2 rounded transition"
+                className="text-xs font-bold uppercase tracking-wide text-gray-500 hover:text-orange-500 hover:bg-orange-50 px-4 py-2 rounded-lg transition-all"
               >
                 {item.label}
               </Link>
@@ -123,18 +123,19 @@ export function Navbar() {
                 href={`https://wa.me/${btn.phone}?text=Hola%20${encodeURIComponent(btn.name)},%20te%20envío%20un%20aviso%20desde%20el%20sistema%20de%20ventas.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-2 transition-all shadow-sm border border-emerald-400/30"
+                className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase flex items-center gap-2 transition-all border border-emerald-100"
               >
-                <span>💬</span>
+                <span className="text-xs">💬</span>
                 <span>Aviso {btn.name}</span>
               </a>
             ))}
-            <span className="text-sm font-medium border-l border-white/20 pl-4">
+            <div className="h-6 w-px bg-gray-100 mx-1"></div>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
               {user.role === 'admin' ? 'Admin' : user.name || `POS ${user.pos_number}`}
             </span>
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm font-semibold transition"
+              className="text-xs font-bold uppercase tracking-wider text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg transition-all"
             >
               Salir
             </button>
@@ -142,40 +143,42 @@ export function Navbar() {
         </div>
 
         {menuOpen && (
-          <div className="lg:hidden mt-3 pb-3 border-t border-orange-500 pt-3 space-y-2">
+          <div className="lg:hidden mt-2 py-2 border-t border-gray-100 space-y-1">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
-                className="block px-3 py-2 rounded hover:bg-orange-500 transition text-sm font-medium"
+                className="block px-4 py-2.5 rounded-xl hover:bg-gray-50 text-gray-600 hover:text-orange-500 transition-all text-sm font-semibold"
               >
                 {item.label}
               </Link>
             ))}
-            <div className="border-t border-orange-500 pt-2 mt-2 space-y-2">
+            <div className="border-t border-gray-100 pt-2 mt-2 space-y-2">
               {whatsappButtons.map(btn => (
                 <a
                   key={btn.pos}
                   href={`https://wa.me/${btn.phone}?text=Hola%20${encodeURIComponent(btn.name)},%20te%20envío%20un%20aviso%20desde%20el%20sistema%20de%20ventas.`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full bg-emerald-500 hover:bg-emerald-600 px-3 py-2 rounded text-xs font-bold uppercase transition text-center"
+                  className="block w-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase transition text-center border border-emerald-100"
                 >
                   💬 Enviar Aviso a {btn.name}
                 </a>
               ))}
-              <p className="px-3 py-1 text-[10px] text-orange-100 uppercase font-bold tracking-widest opacity-60">
-                Sesión: {user.role === 'admin' ? 'Admin' : user.name || `POS ${user.pos_number}`}
-              </p>
+              <div className="px-4 py-2 bg-gray-50 rounded-xl mx-2">
+                <p className="text-[9px] text-gray-400 uppercase font-bold tracking-widest text-center">
+                  Sesión: {user.role === 'admin' ? 'Admin' : user.name || `POS ${user.pos_number}`}
+                </p>
+              </div>
               <button
                 onClick={() => {
                   handleLogout();
                   setMenuOpen(false);
                 }}
-                className="w-full text-left bg-red-500 hover:bg-red-600 px-3 py-2 rounded text-sm font-semibold transition"
+                className="w-full text-center text-red-500 hover:bg-red-50 px-4 py-2.5 rounded-xl text-xs font-bold uppercase transition-all"
               >
-                Salir
+                Cerrar Sesión
               </button>
             </div>
           </div>

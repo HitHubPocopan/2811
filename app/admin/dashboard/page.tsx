@@ -417,7 +417,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Recommendation Tooltip */}
-              <div className="px-4 py-2 rounded-2xl bg-orange-600 text-white flex items-center gap-3 shadow-lg shadow-orange-200">
+              <div className="px-4 py-2 rounded-2xl bg-orange-500 text-white flex items-center gap-3 shadow-lg shadow-orange-500/20">
                 <span className="text-xl">💡</span>
                 <p className="text-xs font-bold tracking-tight">{currentForecast.tip}</p>
               </div>
@@ -431,7 +431,7 @@ export default function AdminDashboardPage() {
                   onClick={() => setSelectedRange(range)}
                   className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     selectedRange === range 
-                      ? 'bg-orange-600 text-white shadow-lg' 
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
                       : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
@@ -443,10 +443,10 @@ export default function AdminDashboardPage() {
               <button onClick={handleRefresh} disabled={refreshing} className="bg-white border border-slate-200 hover:border-slate-300 p-2.5 rounded-xl transition-all disabled:opacity-50 group">
                 <span className={`block transform transition-transform duration-700 ${refreshing ? 'rotate-180' : 'group-hover:rotate-12'}`}>🔄</span>
               </button>
-              <button onClick={handleExportCSV} className="bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white border border-emerald-200 px-5 py-2.5 rounded-xl transition-all text-sm font-medium tracking-wide">
+              <button onClick={handleExportCSV} className="bg-emerald-50 hover:bg-emerald-500 text-emerald-600 hover:text-white border border-emerald-100 px-5 py-2.5 rounded-xl transition-all text-[10px] font-black tracking-widest uppercase">
                 EXPORTAR CSV
               </button>
-              <button onClick={handleExportPDF} disabled={exporting} className="bg-orange-50 hover:bg-orange-600 text-orange-600 hover:text-white border border-orange-200 px-5 py-2.5 rounded-xl transition-all text-sm font-medium tracking-wide">
+              <button onClick={handleExportPDF} disabled={exporting} className="bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white border border-orange-100 px-5 py-2.5 rounded-xl transition-all text-[10px] font-black tracking-widest uppercase">
                 {exporting ? 'GENERANDO...' : 'PDF'}
               </button>
             </div>
@@ -456,10 +456,10 @@ export default function AdminDashboardPage() {
         {loading ? (
           <div className="flex flex-col justify-center items-center py-32 space-y-4">
             <div className="relative">
-              <div className="w-16 h-16 border-t-2 border-orange-600 border-solid rounded-full animate-spin"></div>
-              <div className="absolute inset-0 w-16 h-16 border-t-2 border-orange-400 border-solid rounded-full animate-ping opacity-20"></div>
+              <div className="w-12 h-12 border-t-2 border-orange-500 border-solid rounded-full animate-spin"></div>
+              <div className="absolute inset-0 w-12 h-12 border-t-2 border-orange-300 border-solid rounded-full animate-ping opacity-20"></div>
             </div>
-            <span className="text-slate-400 text-xs tracking-widest font-medium uppercase">Sincronizando base de datos...</span>
+            <span className="text-slate-300 text-[10px] tracking-[0.2em] font-black uppercase">Sincronizando base de datos...</span>
           </div>
         ) : (
           <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -470,85 +470,85 @@ export default function AdminDashboardPage() {
                 title="Ventas Totales" 
                 value={filteredStats.total_sales} 
                 icon="📊" 
-                color="bg-blue-50 text-blue-600 bg-blue-500" 
+                color="bg-blue-50 text-blue-600 border-blue-100" 
                 comparison={filteredStats.previous.total_sales}
               />
               <StatCard 
                 title="Ingresos Brutos" 
                 value={`$${filteredStats.total_revenue.toLocaleString()}`} 
                 icon="💰" 
-                color="bg-emerald-50 text-emerald-600 bg-emerald-500" 
+                color="bg-emerald-50 text-emerald-600 border-emerald-100" 
                 comparison={filteredStats.previous.total_revenue}
               />
               <StatCard 
                 title="Utilidad Estimada (Neto)" 
                 value={`$${(filteredStats.total_revenue - filteredStats.total_commissions).toLocaleString()}`} 
                 icon="🏦" 
-                color="bg-indigo-50 text-indigo-600 bg-indigo-500" 
+                color="bg-indigo-50 text-indigo-600 border-indigo-100" 
                 comparison={filteredStats.previous.total_revenue - filteredStats.previous.total_commissions}
               />
               <StatCard 
                 title="Pérdida Comisiones" 
                 value={`-$${filteredStats.total_commissions.toLocaleString()}`} 
                 icon="💸" 
-                color="bg-rose-50 text-rose-600 bg-rose-500" 
+                color="bg-rose-50 text-rose-600 border-rose-100" 
                 comparison={filteredStats.previous.total_commissions}
                 reverseColors
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <StatCard title="Ticket Promedio" value={`$${averageTicket.toFixed(2)}`} icon="🎟️" color="bg-amber-50 text-amber-600 bg-amber-500" />
-              <StatCard title="Items Vendidos" value={filteredStats.total_items_sold} icon="📦" color="bg-purple-50 text-purple-600 bg-purple-500" />
-              <StatCard title="Total Egresos" value={`$${totalExpenses.toLocaleString()}`} icon="📉" color="bg-rose-50 text-rose-600 bg-rose-500" />
+              <StatCard title="Ticket Promedio" value={`$${averageTicket.toFixed(2)}`} icon="🎟️" color="bg-amber-50 text-amber-600 border-amber-100" />
+              <StatCard title="Items Vendidos" value={filteredStats.total_items_sold} icon="📦" color="bg-purple-50 text-purple-600 border-purple-100" />
+              <StatCard title="Total Egresos" value={`$${totalExpenses.toLocaleString()}`} icon="📉" color="bg-rose-50 text-rose-600 border-rose-100" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Sales Distribution Area Chart */}
-              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
                 <div className="flex justify-between items-center mb-10">
-                  <h2 className="text-xl font-extralight text-slate-900 tracking-tight">Carga por Hora</h2>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-100 px-2 py-1 rounded">24 Horas</span>
+                  <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm">Carga por Hora</h2>
+                  <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">24 Horas</span>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={hourlySales}>
                     <defs>
                       <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#ef7d1a" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="#ef7d1a" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="hour" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} tickMargin={10} />
-                    <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="hour" stroke="#cbd5e1" fontSize={10} tickLine={false} axisLine={false} tickMargin={10} />
+                    <YAxis stroke="#cbd5e1" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '12px' }}
-                      itemStyle={{ color: '#f97316' }}
+                      contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}
+                      itemStyle={{ color: '#ef7d1a' }}
                     />
-                    <Area type="monotone" dataKey="total" stroke="#f97316" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={3} />
+                    <Area type="monotone" dataKey="total" stroke="#ef7d1a" fillOpacity={1} fill="url(#colorTotal)" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
 
               {/* Weekly Heatmap (Bar Chart) */}
-              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col">
                 <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h2 className="text-xl font-extralight text-slate-900 tracking-tight">Rendimiento Semanal</h2>
-                    <p className="text-xs text-slate-400 mt-1">Identifica días para refuerzo de stock y personal</p>
+                    <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm">Rendimiento Semanal</h2>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Refuerzo de stock y personal</p>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-100 px-2 py-1 rounded">Lun - Dom</span>
+                  <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Lun - Dom</span>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={weeklySales}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="day" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} tickMargin={10} />
-                    <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="day" stroke="#cbd5e1" fontSize={10} tickLine={false} axisLine={false} tickMargin={10} />
+                    <YAxis stroke="#cbd5e1" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
                     <Tooltip 
                       cursor={{fill: '#f8fafc'}}
-                      contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '12px' }}
+                      contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}
                     />
-                    <Bar dataKey="total" fill="#f97316" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="total" fill="#ef7d1a" radius={[4, 4, 4, 4]} barSize={32} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -556,47 +556,47 @@ export default function AdminDashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Critical Inventory Section */}
-              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col">
-                <h2 className="text-xl font-extralight text-slate-900 tracking-tight mb-8">Stock Crítico (Bajo)</h2>
-                <div className="space-y-4 flex-1">
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col">
+                <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm mb-8">Stock Crítico</h2>
+                <div className="space-y-3 flex-1">
                   {lowStockProducts.length > 0 ? (
                     lowStockProducts.slice(0, 5).map(product => (
-                      <div key={product.id} className="group flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-orange-200 transition-all">
+                      <div key={product.id} className="group flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-orange-200 transition-all">
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-slate-800 truncate max-w-[140px]">{product.name}</span>
-                          <span className="text-[10px] text-slate-400 uppercase">{product.category || 'General'}</span>
+                          <span className="text-sm font-bold text-gray-700 truncate max-w-[140px] tracking-tight">{product.name}</span>
+                          <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">{product.category || 'General'}</span>
                         </div>
                         <div className="text-right">
-                          <div className={`text-lg font-light ${product.stock === 0 ? 'text-rose-600' : 'text-amber-600'}`}>{product.stock}</div>
-                          <div className="text-[10px] text-slate-400 uppercase tracking-tighter">UNIDADES</div>
+                          <div className={`text-xl font-black ${product.stock === 0 ? 'text-red-500' : 'text-amber-500'}`}>{product.stock}</div>
+                          <div className="text-[8px] text-gray-400 font-black uppercase tracking-[0.2em]">UNIDADES</div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full opacity-30 grayscale">
-                      <span className="text-4xl mb-4">✅</span>
-                      <p className="text-xs text-slate-400 uppercase tracking-widest">Inventario Óptimo</p>
+                    <div className="flex flex-col items-center justify-center h-full py-10 grayscale opacity-20">
+                      <span className="text-5xl mb-4">✨</span>
+                      <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">Inventario Óptimo</p>
                     </div>
                   )}
                 </div>
-                <Link href="/admin/products" className="mt-8 text-center text-xs font-bold text-orange-600 hover:text-orange-700 tracking-widest uppercase transition-all">
+                <Link href="/admin/products" className="mt-8 text-center text-[10px] font-black text-orange-500 hover:text-orange-600 tracking-[0.2em] uppercase transition-all bg-gray-50 py-3 rounded-xl border border-gray-100">
                   Gestionar Inventario →
                 </Link>
               </div>
 
               {/* Low Rotation Products (Scrollable) */}
-              <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm flex flex-col h-[400px]">
+              <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col h-[480px]">
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-xl font-extralight text-slate-900 tracking-tight">Baja Rotación</h2>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-100 px-2 py-1 rounded">Menos vendidos</span>
+                  <h2 className="text-xl font-black text-gray-900 tracking-tight uppercase text-sm">Baja Rotación</h2>
+                  <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Análisis Mensual</span>
                 </div>
-                <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
                   <table className="w-full text-left">
                     <thead className="sticky top-0 bg-white z-10">
-                      <tr className="text-slate-400 text-[10px] uppercase tracking-widest border-b border-slate-100">
-                        <th className="pb-4 font-bold">Producto</th>
-                        <th className="pb-4 font-bold text-right">Ventas</th>
-                        <th className="pb-4 font-bold text-right">Acción</th>
+                      <tr className="text-gray-400 text-[9px] font-black uppercase tracking-widest border-b border-gray-100">
+                        <th className="pb-4">Producto</th>
+                        <th className="pb-4 text-right">Ventas</th>
+                        <th className="pb-4 text-right">Acción</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
