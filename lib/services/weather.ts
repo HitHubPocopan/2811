@@ -40,8 +40,8 @@ export const weatherService = {
       // 85, 86: Snow showers
       // 95, 96, 99: Thunderstorm
       
-      if (code <= 1) return 'sunny';
-      if (code <= 3 || code === 45 || code === 48) return 'cloudy';
+      if (code <= 2) return 'sunny'; // 0, 1, 2: Clear, mainly clear, partly cloudy -> sunny
+      if (code <= 3 || code === 45 || code === 48) return 'cloudy'; // 3: Overcast, 45, 48: Fog -> cloudy
       return 'rainy';
     } catch (e) {
       console.error("Weather fetch failed", e);

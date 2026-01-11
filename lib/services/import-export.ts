@@ -152,7 +152,7 @@ export const importExportService = {
 
     pdf.setFontSize(18);
     pdf.setFont('', 'bold');
-    pdf.text('Reporte de Insights - Sistema de Ventas', margin, yPosition);
+    pdf.text('Reporte de Insights - Pocopán Juguetería', margin, yPosition);
     yPosition += 12;
 
     pdf.setFontSize(10);

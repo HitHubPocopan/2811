@@ -508,7 +508,7 @@ export default function AdminDashboardPage() {
               <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
                 <div className="flex justify-between items-center mb-10">
                   <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm">Carga por Hora</h2>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">24 Horas</span>
+                  <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">24 Horas</span>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={hourlySales}>
@@ -535,9 +535,9 @@ export default function AdminDashboardPage() {
                 <div className="flex justify-between items-center mb-10">
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm">Rendimiento Semanal</h2>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Refuerzo de stock y personal</p>
+                    <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest mt-1">Refuerzo de stock y personal</p>
                   </div>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Lun - Dom</span>
+                  <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Lun - Dom</span>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={weeklySales}>
@@ -564,18 +564,18 @@ export default function AdminDashboardPage() {
                       <div key={product.id} className="group flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-orange-200 transition-all">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-gray-700 truncate max-w-[140px] tracking-tight">{product.name}</span>
-                          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{product.category || 'General'}</span>
+                          <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest">{product.category || 'General'}</span>
                         </div>
                         <div className="text-right">
                           <div className={`text-xl font-bold ${product.stock === 0 ? 'text-red-500' : 'text-amber-500'}`}>{product.stock}</div>
-                          <div className="text-[8px] text-gray-400 font-bold uppercase tracking-[0.2em]">UNIDADES</div>
+                          <div className="text-[8px] text-gray-600 font-bold uppercase tracking-[0.2em]">UNIDADES</div>
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full py-10 grayscale opacity-20">
                       <span className="text-5xl mb-4">✨</span>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em]">Inventario Óptimo</p>
+                      <p className="text-[10px] text-gray-600 font-bold uppercase tracking-[0.3em]">Inventario Óptimo</p>
                     </div>
                   )}
                 </div>
@@ -588,12 +588,12 @@ export default function AdminDashboardPage() {
               <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col h-[480px]">
                 <div className="flex justify-between items-center mb-8">
                   <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm">Baja Rotación</h2>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Análisis Mensual</span>
+                  <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest bg-gray-50 px-2 py-1 rounded border border-gray-100">Análisis Mensual</span>
                 </div>
                 <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
                   <table className="w-full text-left">
                     <thead className="sticky top-0 bg-white z-10">
-                      <tr className="text-gray-400 text-[9px] font-bold uppercase tracking-widest border-b border-gray-100">
+                      <tr className="text-gray-600 text-[9px] font-bold uppercase tracking-widest border-b border-gray-100">
                         <th className="pb-4">Producto</th>
                         <th className="pb-4 text-right">Ventas</th>
                         <th className="pb-4 text-right">Acción</th>

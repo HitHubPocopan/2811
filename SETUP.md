@@ -1,4 +1,4 @@
-# Configuración del Sistema de Ventas Multi-POS
+# Configuración de Pocopán Juguetería
 
 ## Requisitos
 

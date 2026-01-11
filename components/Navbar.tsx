@@ -75,7 +75,7 @@ export function Navbar() {
             
             {forecast && (
               <div className="hidden md:flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
-                <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-400">Pronóstico:</span>
+                <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-600">Pronóstico:</span>
                 <div className="flex gap-4 text-[11px] font-medium text-gray-600">
                   <div className="flex items-center gap-1.5" title={`Mañana: ${forecast.morning.status}`}>
                     <span className="opacity-70">Mañana</span>
@@ -130,7 +130,7 @@ export function Navbar() {
               </a>
             ))}
             <div className="h-6 w-px bg-gray-100 mx-1"></div>
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+            <span className="text-xs font-semibold text-gray-600 uppercase tracking-widest">
               {user.role === 'admin' ? 'Admin' : user.name || `POS ${user.pos_number}`}
             </span>
             <button
@@ -167,7 +167,7 @@ export function Navbar() {
                 </a>
               ))}
               <div className="px-4 py-2 bg-gray-50 rounded-xl mx-2">
-                <p className="text-[9px] text-gray-400 uppercase font-semibold tracking-widest text-center">
+                <p className="text-[9px] text-gray-600 uppercase font-semibold tracking-widest text-center">
                   Sesión: {user.role === 'admin' ? 'Admin' : user.name || `POS ${user.pos_number}`}
                 </p>
               </div>

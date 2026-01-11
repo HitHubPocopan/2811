@@ -372,15 +372,15 @@ export default function StatsPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
-                <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm font-semibold mb-2">Total de ventas</p>
+                <p className="text-gray-600 dark:text-gray-600 text-xs sm:text-sm font-semibold mb-2">Total de ventas</p>
                 <p className="text-2xl sm:text-4xl font-bold text-orange-600 dark:text-orange-400">{stats.total_sales}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
-                <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm font-semibold mb-2">Ingresos totales</p>
+                <p className="text-gray-600 dark:text-gray-600 text-xs sm:text-sm font-semibold mb-2">Ingresos totales</p>
                 <p className="text-2xl sm:text-4xl font-bold text-green-600 dark:text-green-400">${stats.total_revenue.toFixed(2)}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow sm:col-span-2 lg:col-span-1">
-                <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm font-semibold mb-2">Items vendidos</p>
+                <p className="text-gray-600 dark:text-gray-600 text-xs sm:text-sm font-semibold mb-2">Items vendidos</p>
                 <p className="text-2xl sm:text-4xl font-bold text-purple-600 dark:text-purple-400">{stats.total_items_sold}</p>
               </div>
             </div>
@@ -389,7 +389,7 @@ export default function StatsPage() {
               <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
                 <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Ventas por Clima y Hora</h2>
                 {salesByWeather.length === 0 ? (
-                  <p className="text-gray-600 dark:text-gray-400">No hay datos disponibles</p>
+                  <p className="text-gray-600 dark:text-gray-600">No hay datos disponibles</p>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={salesByWeather} margin={{ bottom: 20 }}>
@@ -409,7 +409,7 @@ export default function StatsPage() {
               <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
                 <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Ventas por Método de Pago</h2>
                 {salesByPayment.length === 0 ? (
-                  <p className="text-gray-600 dark:text-gray-400">No hay datos disponibles</p>
+                  <p className="text-gray-600 dark:text-gray-600">No hay datos disponibles</p>
                 ) : (
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
@@ -440,7 +440,7 @@ export default function StatsPage() {
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
               <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Ventas por Hora (últimos 30 días)</h2>
               {salesPerHour.length === 0 ? (
-                <p className="text-gray-600 dark:text-gray-400">No hay datos disponibles</p>
+                <p className="text-gray-600 dark:text-gray-600">No hay datos disponibles</p>
               ) : (
                 <div className="space-y-6">
                   <ResponsiveContainer width="100%" height={350}>
@@ -481,7 +481,7 @@ export default function StatsPage() {
                                 {shift.percentage.toFixed(1)}%
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{shift.sales_count}</td>
+                            <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-600">{shift.sales_count}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -494,7 +494,7 @@ export default function StatsPage() {
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
               <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Productos más vendidos</h2>
               {stats.top_products.length === 0 ? (
-                <p className="text-gray-600 dark:text-gray-400">No hay datos disponibles</p>
+                <p className="text-gray-600 dark:text-gray-600">No hay datos disponibles</p>
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={stats.top_products}>
@@ -513,7 +513,7 @@ export default function StatsPage() {
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
               <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Ventas por Día (últimos 200 días)</h2>
               {salesPerDay.length === 0 ? (
-                <p className="text-gray-600 dark:text-gray-400">No hay datos disponibles</p>
+                <p className="text-gray-600 dark:text-gray-600">No hay datos disponibles</p>
               ) : (
                 <div className="space-y-4">
                   <ResponsiveContainer width="100%" height={300}>
@@ -549,13 +549,13 @@ export default function StatsPage() {
                                   <div className="space-y-1">
                                     <div className="font-medium text-gray-900 dark:text-gray-100">{weather.summary}</div>
                                     {weather.hasVariation && (
-                                      <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                      <div className="text-xs text-gray-500 dark:text-gray-600 italic">
                                         Mañana: {weather.morning} | Tarde: {weather.afternoon} | Noche: {weather.evening}
                                       </div>
                                     )}
                                   </div>
                                 ) : (
-                                  <span className="text-gray-400 dark:text-gray-500">Cargando...</span>
+                                  <span className="text-gray-600 dark:text-gray-500">Cargando...</span>
                                 )}
                               </td>
                               <td className="px-4 py-3 text-right font-bold text-orange-600 dark:text-orange-400">${day.total.toFixed(2)}</td>
@@ -572,7 +572,7 @@ export default function StatsPage() {
             <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow">
               <h2 className="text-lg sm:text-xl font-bold mb-4 text-gray-900 dark:text-white">Últimas ventas</h2>
               {stats.last_sales.length === 0 ? (
-                <p className="text-gray-600 dark:text-gray-400">No hay ventas registradas</p>
+                <p className="text-gray-600 dark:text-gray-600">No hay ventas registradas</p>
               ) : (
                 <div className="space-y-3">
                   {stats.last_sales.map((sale) => (
@@ -585,7 +585,7 @@ export default function StatsPage() {
                           {new Date(sale.created_at).toLocaleDateString('es-AR')} -{' '}
                           {new Date(sale.created_at).toLocaleTimeString('es-AR')}
                         </p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
+                        <p className="text-xs text-gray-600 dark:text-gray-600">
                           {sale.items.reduce((sum, item) => sum + item.quantity, 0)} items
                         </p>
                       </div>
@@ -597,7 +597,7 @@ export default function StatsPage() {
             </div>
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-600 dark:text-gray-400">Error al cargar estadísticas</div>
+          <div className="text-center py-12 text-gray-600 dark:text-gray-600">Error al cargar estadísticas</div>
         )}
       </div>
     </div>

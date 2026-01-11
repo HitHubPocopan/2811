@@ -45,16 +45,16 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-10 w-full max-w-md">
         <div className="mb-10 text-center">
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            SISTEMA<span className="text-orange-500">VENTAS</span>
+            POCOPÁN<span className="text-orange-500">JUGUETERÍA</span>
           </h1>
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mt-2">
+          <p className="text-gray-600 text-xs font-bold uppercase tracking-[0.2em] mt-2">
             Panel de Acceso
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+            <label className="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2 ml-1">
               Email de Usuario
             </label>
             <input
@@ -68,7 +68,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">
+            <label className="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-2 ml-1">
               Contraseña
             </label>
             <input

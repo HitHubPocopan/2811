@@ -140,17 +140,17 @@ export default function CatalogPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Catálogo de Productos</h1>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-600">
                   Mostrando {filteredProducts.length} de {products.length} productos
                 </p>
               </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full">
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex-1 transition-all hover:shadow-md">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Turno</p>
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Total Turno</p>
                 <p className="text-2xl font-bold text-orange-500 tracking-tight">${todayTotal.toFixed(2)}</p>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-100 flex-1 transition-all hover:shadow-md">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Redes</p>
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1">Total Redes</p>
                 <p className="text-2xl font-bold text-blue-500 tracking-tight">${todayTotalCombined.toFixed(2)}</p>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function CatalogPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Categoría</label>
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-widest ml-1">Categoría</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => {
@@ -187,7 +187,7 @@ export default function CatalogPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Sub-Categoría</label>
+              <label className="block text-[10px] font-bold text-gray-600 uppercase tracking-widest ml-1">Sub-Categoría</label>
               <select
                 value={selectedSubcategory}
                 onChange={(e) => setSelectedSubcategory(e.target.value)}
@@ -216,7 +216,7 @@ export default function CatalogPage() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center grayscale opacity-30">
               <span className="text-5xl mb-4 block">📦</span>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">
                 {searchTerm ? 'No hay coincidencias' : 'Inventario Vacío'}
               </p>
             </div>

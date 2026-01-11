@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Sistema de Ventas Multi-POS',
-  description: 'Sistema de gestión de ventas para múltiples puntos de venta',
+  title: 'Pocopán Juguetería',
+  description: 'Sistema de gestión de ventas para Pocopán Juguetería',
 };
 
 export default function RootLayout({

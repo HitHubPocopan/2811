@@ -467,7 +467,7 @@ export default function ProductsPage() {
                     setPurchaseData({ quantity: '', purchasePrice: '' });
                     setPurchaseMessage('');
                   }}
-                  className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                  className="text-gray-600 hover:text-gray-600 text-xl font-bold"
                 >
                   ✕
                 </button>
@@ -754,7 +754,7 @@ export default function ProductsPage() {
                             )}
                           </div>
                         ) : (
-                          <span className="text-gray-400">Sin categoría</span>
+                          <span className="text-gray-600">Sin categoría</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm">
@@ -764,7 +764,7 @@ export default function ProductsPage() {
                         {lastPurchase ? (
                           <span className="font-bold text-blue-600">${lastPurchase.purchase_price.toFixed(2)}</span>
                         ) : (
-                          <span className="text-gray-400 italic">Sin datos</span>
+                          <span className="text-gray-600 italic">Sin datos</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm">
@@ -773,7 +773,7 @@ export default function ProductsPage() {
                             {margin.toFixed(1)}%
                           </span>
                         ) : (
-                          <span className="text-gray-400 italic">-</span>
+                          <span className="text-gray-600 italic">-</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm space-x-2">

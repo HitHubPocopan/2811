@@ -126,7 +126,7 @@ export default function CheckoutPage() {
                 <div key={item.product_id} className="flex justify-between pb-3 border-b">
                   <div>
                     <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">{item.product_name || 'Producto desconocido'}</p>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-600">
                       ${item.price.toFixed(2)} x {item.quantity}
                     </p>
                   </div>
