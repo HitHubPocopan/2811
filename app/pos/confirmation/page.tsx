@@ -1,11 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
 
 export default function ConfirmationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isOffline = searchParams.get('offline') === 'true';
   const { user } = useAuthStore();
 
   if (!user) {
@@ -33,8 +35,14 @@ export default function ConfirmationPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-green-600 mb-2">¡Venta completada!</h1>
-            <p className="text-gray-600">La venta ha sido registrada correctamente</p>
+            <h1 className="text-3xl font-bold text-green-600 mb-2">
+              {isOffline ? '¡Venta guardada (Offline)!' : '¡Venta completada!'}
+            </h1>
+            <p className="text-gray-600">
+              {isOffline 
+                ? 'La venta se ha guardado localmente y se sincronizará automáticamente cuando vuelvas a tener conexión.'
+                : 'La venta ha sido registrada correctamente'}
+            </p>
           </div>
 
           <button

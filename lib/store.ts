@@ -73,3 +73,48 @@ export const useCartStore = create<CartState>()(
     }
   )
 );
+
+interface PendingSale {
+  id: string;
+  posId: string;
+  posNumber: number;
+  items: CartItem[];
+  total: number;
+  paymentMethod?: string;
+  paymentBreakdown?: any;
+  createdAt: string;
+}
+
+interface OfflineState {
+  pendingSales: PendingSale[];
+  addPendingSale: (sale: Omit<PendingSale, 'id' | 'createdAt'>) => void;
+  removePendingSale: (id: string) => void;
+  clearPendingSales: () => void;
+}
+
+export const useOfflineStore = create<OfflineState>()(
+  persist(
+    (set) => ({
+      pendingSales: [],
+      addPendingSale: (sale) =>
+        set((state) => ({
+          pendingSales: [
+            ...state.pendingSales,
+            {
+              ...sale,
+              id: crypto.randomUUID(),
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        })),
+      removePendingSale: (id) =>
+        set((state) => ({
+          pendingSales: state.pendingSales.filter((s) => s.id !== id),
+        })),
+      clearPendingSales: () => set({ pendingSales: [] }),
+    }),
+    {
+      name: 'offline-store',
+    }
+  )
+);

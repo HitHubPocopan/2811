@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
-import { useAuthStore, useCartStore } from '@/lib/store';
+import { useAuthStore, useCartStore, useOfflineStore } from '@/lib/store';
 import { productService } from '@/lib/services/products';
 import { Product, SaleItem, PaymentMethod, PaymentBreakdown } from '@/lib/types';
 
@@ -11,6 +11,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { items, getTotal, clearCart } = useCartStore();
+  const { addPendingSale } = useOfflineStore();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
@@ -74,6 +75,10 @@ export default function CheckoutPage() {
     }
 
     try {
+      if (!navigator.onLine) {
+        throw new Error('Offline');
+      }
+
       const response = await fetch('/api/sales', {
         method: 'POST',
         headers: {
@@ -92,17 +97,24 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Error al procesar la venta. Intenta nuevamente.');
-        setProcessing(false);
-        return;
+        throw new Error(data.error || 'Server error');
       }
 
       clearCart();
       router.push('/pos/confirmation');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido al procesar la venta';
-      setError(errorMessage);
-      setProcessing(false);
+      // Offline fallback
+      addPendingSale({
+        posId: user.id,
+        posNumber: user.pos_number || 0,
+        items: saleItems as any,
+        total,
+        paymentMethod: paymentMethod as string,
+        paymentBreakdown,
+      });
+      
+      clearCart();
+      router.push('/pos/confirmation?offline=true');
     }
   };
 

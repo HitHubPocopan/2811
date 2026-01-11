@@ -14,7 +14,7 @@ import { weatherService, WeatherCondition } from '@/lib/services/weather';
 import { 
   BarChart, Bar, PieChart, Pie, Cell, 
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  AreaChart, Area
+  AreaChart, Area, LineChart, Line
 } from 'recharts';
 import { supabase } from '@/lib/supabase';
 import * as XLSX from 'xlsx';
@@ -34,6 +34,7 @@ export default function AdminDashboardPage() {
   // State
   const [posStats, setPosStats] = useState<POSDashboardStats[]>([]);
   const [allSales, setAllSales] = useState<Sale[]>([]);
+  const [salesPerDay, setSalesPerDay] = useState<any[]>([]);
   const [totalExpenses, setTotalExpenses] = useState<number>(0);
   const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,12 +119,14 @@ export default function AdminDashboardPage() {
 
   // Data Fetching
   const fetchStats = useCallback(async () => {
-    const [sales, products] = await Promise.all([
+    const [sales, products, salesHistory] = await Promise.all([
       salesService.getAllSales(10000),
-      productService.getAll()
+      productService.getAll(),
+      salesService.getSalesPerDay(200)
     ]);
     
     setAllSales(sales);
+    setSalesPerDay(salesHistory);
     setLowStockProducts(products.filter(p => p.stock <= 5).sort((a, b) => a.stock - b.stock));
 
     const posDataArray = [];
@@ -501,6 +504,64 @@ export default function AdminDashboardPage() {
               <StatCard title="Ticket Promedio" value={`$${averageTicket.toFixed(2)}`} icon="🎟️" color="bg-amber-50 text-amber-600 border-amber-100" />
               <StatCard title="Items Vendidos" value={filteredStats.total_items_sold} icon="📦" color="bg-purple-50 text-purple-600 border-purple-100" />
               <StatCard title="Total Egresos" value={`$${totalExpenses.toLocaleString()}`} icon="📉" color="bg-rose-50 text-rose-600 border-rose-100" />
+            </div>
+
+            {/* Daily Sales Chart (Last 200 Days) */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 tracking-tight uppercase text-sm">Ventas por Día (últimos 200 días)</h2>
+                  <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest mt-1">Consolidado de red y POS individuales</p>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Total</span>
+                  </div>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={salesPerDay}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#cbd5e1" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickMargin={10}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval={Math.floor(salesPerDay.length / 10)}
+                  />
+                  <YAxis stroke="#cbd5e1" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    content={(props) => {
+                      const { payload } = props;
+                      return (
+                        <div className="flex justify-center gap-6 mt-4">
+                          {payload?.map((entry: any, index: number) => (
+                            <div key={`item-${index}`} className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
+                              <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{entry.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }}
+                  />
+                  <Line type="monotone" dataKey="total" name="Ventas del Día" stroke="#ef7d1a" strokeWidth={3} dot={{ r: 4, fill: '#ef7d1a', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                  <Line type="monotone" dataKey="pos1" name="Costa del Este" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, fill: '#3b82f6' }} strokeDasharray="5 5" />
+                  <Line type="monotone" dataKey="pos2" name="Mar de las Pampas" stroke="#10b981" strokeWidth={2} dot={{ r: 3, fill: '#10b981' }} strokeDasharray="5 5" />
+                  <Line type="monotone" dataKey="pos3" name="Costa Esmeralda" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3, fill: '#8b5cf6' }} strokeDasharray="5 5" />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
