@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * ConfirmationPage component handles the post-purchase confirmation screen.
+ * It uses Suspense to safely access search parameters during static generation.
+ */
+
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { useAuthStore } from '@/lib/store';
